@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NIST Group Demo — Help</title>
+<style>
+  body { margin: 0; padding: 18px 22px 40px; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: #1c2340; background: #fff; }
+  h1 { font-size: 20px; margin: 0 0 4px; color: #13204f; }
+  .sub { color: #5a6488; margin: 0 0 18px; font-size: 13px; }
+  h2 { font-size: 15px; margin: 22px 0 6px; color: #13204f; border-bottom: 1px solid #d6dcf0; padding-bottom: 3px; }
+  p, ul { margin: 6px 0; }
+  ul { padding-left: 20px; }
+  li { margin: 3px 0; }
+  kbd { font: 12px ui-monospace, Menlo, monospace; background: #eef1fa; border: 1px solid #c8cfe6; border-bottom-width: 2px;
+        border-radius: 4px; padding: 0 5px; white-space: nowrap; }
+  table { border-collapse: collapse; margin: 6px 0; }
+  td { padding: 3px 12px 3px 0; vertical-align: top; }
+  .btn { display: inline-block; background: #1e2e6e; color: #cfe0ff; border-radius: 4px; padding: 0 7px; font-size: 12px; white-space: nowrap; }
+  .note { background: #f4f6fc; border-left: 3px solid #6080e0; padding: 6px 10px; margin: 8px 0; font-size: 13px; }
+  .logo { text-align: center; margin: 0 0 12px; }
+  .logo img { max-width: 100%; height: auto; }
+  h3 { font-size: 13px; margin: 12px 0 4px; color: #13204f; }
+  nav a { margin-right: 10px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="logo"><img src="logo4-72.gif" alt="The Visualization and Virtual Reality Group"></div>
+<h3>This is a "ressurection" of a VRML demo created in 1998.</h3>
+
+<h1>NIST Group Demo — Help</h1>
+<p>This VRML demo was created to show off many projects in the VVRG group in 1998ish. It was never shown outside of NIST but was a substantial effort. Hope you enjoy!</p>
+<p class="sub">A walk-through VRML world from NIST's Visualization &amp; Virtual Reality Group, played here in the X_ITE browser.</p>
+<nav><a href="#move">Moving</a><a href="#views">Viewpoints</a><a href="#rooms">Rooms</a><a href="#elevator">Elevator</a><a href="#tips">Tips</a><a href="#credits">Credits</a></nav>
+
+
+<h2 id="move">Moving around</h2>
+<table>
+  <tr><td><kbd>W</kbd> / <kbd>↑</kbd></td><td>Walk forward</td></tr>
+  <tr><td><kbd>S</kbd> / <kbd>↓</kbd></td><td>Walk backward</td></tr>
+  <tr><td><kbd>A</kbd> / <kbd>D</kbd></td><td>Step left / right</td></tr>
+  <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>Turn left / right</td></tr>
+  <tr><td><kbd>Shift</kbd> (held)</td><td>Move 3× faster</td></tr>
+  <tr><td>Mouse drag</td><td>X_ITE's own navigation: walk, look around or examine, depending on the world</td></tr>
+</table>
+<p class="note">If the keys stop working after you click a link in this panel, click once in the 3D view to give it the keyboard back.</p>
+
+<h2 id="views">Viewpoints</h2>
+<p>The world has many preset camera positions (viewpoints) that take you straight to each exhibit.</p>
+<ul>
+  <li><b>List of viewpoints:</b> <b>right-click</b> in the 3D view and choose <b>Viewpoints</b> from the menu. Pick any one to fly there.</li>
+  <li><b>Step through them:</b> the <span class="btn">◀ View</span> and <span class="btn">View ▶</span> buttons in the header go to the previous and next viewpoint, a quick guided tour. <kbd>Page Up</kbd> and <kbd>Page Down</kbd> do the same.</li>
+  <li><span class="btn">Reset view</span> (or <kbd>Home</kbd>) returns to the first viewpoint. <kbd>End</kbd> jumps to the last one.</li>
+  <li><span class="btn">⌂ Hall</span> reloads the main hall (<code>index.wrl</code>) from the start, for example after you've followed a link into another world or dropped in a file.</li>
+</ul>
+
+<h2 id="rooms">The rooms</h2>
+<p>The building was adapted from the <i>Virtual Music Museum</i> and redecorated with the group's projects. Its rooms are spread over three floors joined by an elevator and stairs.</p>
+<ul>
+  <li><b>Anthropometry (AnthroKids) room:</b> VRML models of children and a child in an air-bag car seat, from NIST's anthropometric data on children.
+    <b>Click the pictures on the wall to play their videos</b>, including a baby movie and an air-bag test with sound. Click a picture again to replay it.</li>
+  <li><b>Anthropometric Landmarks of the Head:</b> a scanned head in a glass case that slowly turns. The white dots mark standard measurement landmarks on the head and face.</li>
+  <li><b>The stairs and the falling man:</b> <b>click the human figure at the top of the steps</b> and he's pushed down the stairs, tumbling under simulated physics, with a “D'oh!”.</li>
+  <li><b>WebMetrics room:</b> displays for the WebVIP, WebCAT and WebSAT web-usability tools. Their signs link to the project pages.</li>
+  <li><b>NIRVE:</b> a 3D visualization of search results (concept clusters on a sphere). The sign links to the publication.</li>
+  <li><b>Robot and miter saw:</b> animated machinery models. Click parts of the robot to set them moving.</li>
+  <li><b>Credits room:</b> photos of the group's members on the walls. Click a photo to open that person's page. The <b>Credits</b> plaque opens the full demo credits in this panel.</li>
+</ul>
+
+<h2 id="elevator">The elevator</h2>
+<p>The elevator works and takes you between all three floors.</p>
+<ul>
+  <li><b>Call it:</b> click the call button beside the elevator door on your floor. The doors chime and open when it arrives.</li>
+  <li><b>Ride it:</b> step inside. Music starts and the camera rides along with the car. <b>Press a floor button</b> to go up or down. Each button plays a short announcement for its floor.</li>
+  <li>The car moves, stops, and opens its doors at the floor you chose. If you press another button while it's moving or the doors are cycling, it goes there next.</li>
+</ul>
+
+<h2 id="tips">Tips</h2>
+<ul>
+  <li><b>Info panel:</b> the <span class="btn">Info panel</span> button shows or hides this side panel, where links from the world open.</li>
+  <li><b>View other files:</b> drag a <code>.wrl</code>, <code>.x3dv</code>, <code>.x3d</code>, <code>.gltf</code> or <code>.glb</code> file onto the page to view it. Files it refers to are found in this folder, or you can drop them along with it. <span class="btn">⌂ Hall</span> brings the demo back.</li>
+  <li><b>More options:</b> the right-click menu also has navigation modes, rendering options and full-screen.</li>
+  <li><b>Dead links:</b> some links point to old NIST pages that no longer exist, and they'll open an error page.</li>
+</ul>
+<h2 id="credits">Credits</h2>
+<p>This VRML demo has been the result of contributions from virtually all members of the VVRG group. In addition we have &quot;borrowed&quot; media assets from a number of sources. In particular the original geometry of the building which comprises the main VRML&nbsp;environment came from the <a href="http://www.musiknet.se/musikmuseum/sve/index.html" target="_blank">Virtual Music Museum</a> (with their kind permission). We substantially redecorated, and added the elevator controls.</p>
+
+<h3>Demo Design and Implementation:</h3>
+<ul>
+  <li>Sandy Ressler and Brian Antonishek</li>
+</ul>
+
+<h3>VRML&nbsp;Objects:</h3>
+<ul>
+  <li>NIRVE&nbsp;sphere:&nbsp;John Cugini</li>
+  <li>Air bag car seat and VRML&nbsp;child:&nbsp;export from Transom Jack</li>
+  <li>Robot and Miter Saw: Qiming Wang</li>
+  <li>Chain and Falling Man: Afzal Godil</li>
+  <li>Anthropometric Head: Sandy Ressler, Greg Seidman</li>
+  <li>Chair in webmetrics room: 3name3D</li>
+</ul>
+
+<h3>Textures:</h3>
+<ul>
+  <li>Photographs of group members: Sandy Ressler</li>
+  <li>WebMetrics logos: Bill Welsh</li>
+</ul>
+
+<h3>Music and Sound Effects:</h3>
+<ul>
+  <li>Elevator Music: &quot;Carnival&quot; by Natalie Merchant</li>
+  <li>Elevator door opening - Star Trek Next Generation</li>
+  <li>Falling Man - Homer Simpson</li>
+  <li>Chain - Monty Python</li>
+</ul>
+</body>
+</html>

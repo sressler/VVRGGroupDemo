@@ -1,0 +1,64 @@
+#VRML V2.0 utf8
+
+WorldInfo {
+  info	"Packaged by CosmoPackage"
+}
+Transform {
+  children	[
+    DEF TS1 TouchSensor {
+    }
+    Group {
+      children	[
+	Transform {
+	  children	Shape {
+	    appearance	Appearance {
+	      material	DEF M Material {
+		diffuseColor	1 1 1
+	      }
+
+	      texture	DEF M1 MovieTexture {
+		url	"airsnd.mpg"
+		loop	FALSE
+		startTime	0
+	      }
+
+	      textureTransform	NULL
+
+	    }
+
+	    geometry	DEF IFS IndexedFaceSet {
+	      coord	Coordinate {
+		point	[ -1.1 -1 0,
+			  1 -1 0,
+			  1 1 0,
+			  -1.1 1 0 ]
+	      }
+
+	      color	NULL
+
+	      coordIndex	[ 0, 1, 2, 3 ]
+	      normal	NULL
+
+	      texCoord	NULL
+
+	    }
+
+	  }
+
+	  translation	0.0192146 -0.0488705 0
+	  rotation	0 0 1  0
+	  scale	1 1.10292 1
+	  scaleOrientation	-6.31322e-11 1 6.65919e-11  1.5708
+	}
+	Sound {
+	  source	USE M1
+
+	}
+	Background {
+	  skyColor	1 1 1
+	}
+      ]
+    }
+  ]
+}
+ROUTE TS1.touchTime TO M1.set_startTime

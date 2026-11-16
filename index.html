@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NIST Group Demo — VRML World Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a1a;
+      color: #e0e8ff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top bar ── */
+    #topbar {
+      background: linear-gradient(135deg, #0d1b4b 0%, #1a2060 100%);
+      border-bottom: 1px solid #2a3a8a;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      z-index: 10;
+      box-shadow: 0 2px 12px rgba(0,0,80,0.5);
+    }
+
+    #topbar h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #8ab4ff;
+      white-space: nowrap;
+      margin-right: 6px;
+    }
+    #topbar h1 span { color: #c0d4ff; font-weight: 400; font-size: 11px; }
+
+    .sep { width: 1px; height: 22px; background: #2a3a8a; flex-shrink: 0; }
+
+    button.btn {
+      background: #1e2e6e;
+      border: 1px solid #3a50b0;
+      color: #aac4ff;
+      border-radius: 5px;
+      padding: 5px 11px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    button.btn:hover { background: #2a3e90; color: #fff; }
+    button.btn.active { background: #3a60d0; color: #fff; border-color: #6080e0; }
+
+    select.btn {
+      background: #1e2e6e;
+      border: 1px solid #3a50b0;
+      color: #aac4ff;
+      border-radius: 5px;
+      padding: 5px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      max-width: 180px;
+    }
+
+    #tourBtn::before { content: "▶ "; }
+    #tourBtn.active::before { content: "⏸ "; }
+
+    /* ── Canvas ── */
+    #canvas-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #canvas-wrap canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* ── Overlay ── */
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5,8,25,0.88);
+      z-index: 5;
+      gap: 18px;
+    }
+    #overlay.hidden { display: none; }
+
+    #overlay .title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #8ab4ff;
+      letter-spacing: 0.08em;
+    }
+    #overlay .sub {
+      font-size: 13px;
+      color: #6070a0;
+    }
+
+    #progress-wrap {
+      width: 320px;
+      background: #1a2050;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #2a3a8a;
+    }
+    #progress-bar {
+      height: 8px;
+      background: linear-gradient(90deg, #3a60d0, #60a0ff);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    #progress-label {
+      font-size: 11px;
+      color: #6080c0;
+      text-align: center;
+      padding: 4px;
+    }
+
+    #error-box {
+      display: none;
+      background: #2a1010;
+      border: 1px solid #802020;
+      border-radius: 6px;
+      padding: 12px 18px;
+      color: #ff8080;
+      font-size: 12px;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    /* ── HUD bottom-left ── */
+    #hud {
+      position: absolute;
+      bottom: 12px;
+      left: 14px;
+      font-size: 11px;
+      color: #40508a;
+      z-index: 4;
+      line-height: 1.6;
+      pointer-events: none;
+    }
+
+    /* ── Audio status ── */
+    #audio-status {
+      position: absolute;
+      bottom: 12px;
+      right: 14px;
+      font-size: 11px;
+      color: #3a5090;
+      z-index: 4;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div id="topbar">
+  <h1>NIST Group Demo <span>c. 1996 · VRML 2.0</span></h1>
+  <div class="sep"></div>
+
+  <button class="btn" id="tourBtn" onclick="toggleTour()">Tour</button>
+
+  <select class="btn" id="vpSelect" onchange="goToViewpoint(this.value)">
+    <option value="">— Viewpoint —</option>
+    <option value="start">Start</option>
+    <option value="startA">Start A</option>
+    <option value="startB">Start B</option>
+    <option value="enterKidsRm">Kids Room Entrance</option>
+    <option value="3kids">3 Kids</option>
+    <option value="exitKidsRm">Kids Room Exit</option>
+    <option value="Elevator2">Elevator (upper)</option>
+    <option value="Elevator1">Elevator (lower)</option>
+    <option value="webmetrics">WebMetrics</option>
+    <option value="DonNormanQ">Don Norman Quote</option>
+    <option value="stairs">Stairs</option>
+    <option value="airbag">Airbag Demo</option>
+    <option value="Elevator3">Elevator 3</option>
+    <option value="krev">K-Rev</option>
+    <option value="nirve">Nirve</option>
+  </select>
+
+  <div class="sep"></div>
+
+  <button class="btn" id="audioBtn" onclick="toggleAudio()">🔇 Audio Off</button>
+  <button class="btn" id="helpBtn" onclick="toggleHelp()">? Help</button>
+</div>
+
+<!-- Main 3D viewport -->
+<div id="canvas-wrap">
+
+  <!-- Loading overlay -->
+  <div id="overlay">
+    <div class="title">NIST Group Demo</div>
+    <div class="sub">Loading 3D scene…</div>
+    <div id="progress-wrap">
+      <div id="progress-bar"></div>
+      <div id="progress-label">Initializing…</div>
+    </div>
+    <div id="error-box"></div>
+  </div>
+
+  <div id="hud">
+    Mouse drag: rotate &nbsp;|&nbsp; Scroll: zoom &nbsp;|&nbsp; Right drag: pan
+  </div>
+  <div id="audio-status"></div>
+</div>
+
+<!-- Three.js via importmap -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ─── Scene ────────────────────────────────────────────────────────────────
+const wrap     = document.getElementById('canvas-wrap');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+wrap.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x111830);
+scene.fog = new THREE.Fog(0x111830, 30, 120);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 500);
+camera.position.set(1.29, 2.68, -1.89);
+camera.lookAt(0, 2, 0);
+
+// Ambient + directional lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
+const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+sunLight.position.set(10, 20, 10);
+scene.add(sunLight);
+
+// Controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping  = true;
+controls.dampingFactor  = 0.08;
+controls.screenSpacePanning = true;
+controls.minDistance    = 0.1;
+controls.maxDistance    = 200;
+controls.target.set(0, 2, 0);
+
+// Resize handler
+function onResize() {
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+// ─── Progress UI ──────────────────────────────────────────────────────────
+const progressBar   = document.getElementById('progress-bar');
+const progressLabel = document.getElementById('progress-label');
+const overlay       = document.getElementById('overlay');
+const errorBox      = document.getElementById('error-box');
+
+function setProgress(pct, label) {
+  progressBar.style.width  = pct + '%';
+  progressLabel.textContent = label;
+}
+
+function showError(msg) {
+  errorBox.style.display = 'block';
+  errorBox.textContent   = '⚠ ' + msg;
+}
+
+// ─── Texture re-application ───────────────────────────────────────────────
+// During conversion, material UUIDs were stamped into material.name.
+// texture_map.json maps those UUIDs → texture filename+slot.
+async function applyTextures(loadedScene) {
+  let textureMap;
+  try {
+    const resp = await fetch(`texture_map.json?v=${Date.now()}`);
+    textureMap = await resp.json();
+  } catch(e) {
+    console.warn('texture_map.json not found, skipping textures', e);
+    return;
+  }
+
+  // Build a lookup: uuid → [{ key, name }, ...]
+  const byUUID = {};
+  for (const entry of textureMap) {
+    if (!byUUID[entry.uuid]) byUUID[entry.uuid] = [];
+    byUUID[entry.uuid].push(entry);
+  }
+
+  const texLoader = new THREE.TextureLoader();
+  const loadTex   = (url) => new Promise((res, rej) => texLoader.load(url, res, undefined, rej));
+  const promises  = [];
+
+  loadedScene.traverse(obj => {
+    if (!obj.isMesh || !obj.material) return;
+    const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+    for (const mat of mats) {
+      const entries = byUUID[mat.name];
+      if (!entries) continue;
+      for (const { key, name } of entries) {
+        const p = loadTex(`${name}?v=${Date.now()}`).then(tex => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.flipY = false; // glTF convention
+          mat[key] = tex;
+          mat.needsUpdate = true;
+        }).catch(e => console.warn(`Could not load texture ${name}:`, e));
+        promises.push(p);
+      }
+    }
+  });
+
+  await Promise.allSettled(promises);
+  console.log(`Applied ${promises.length} textures`);
+}
+
+// ─── glTF loading ─────────────────────────────────────────────────────────
+const loader = new GLTFLoader();
+
+setProgress(5, 'Fetching scene.gltf…');
+
+loader.load(
+  `scene.gltf?v=${Date.now()}`,
+
+  // onLoad
+  async (gltf) => {
+    setProgress(80, 'Scene loaded — applying textures…');
+    scene.add(gltf.scene);
+    await applyTextures(gltf.scene);
+    setProgress(100, 'Done!');
+    setTimeout(() => overlay.classList.add('hidden'), 600);
+    if (audioEnabled) startAmbient();
+  },
+
+  // onProgress
+  (xhr) => {
+    if (xhr.total) {
+      const pct = Math.round((xhr.loaded / xhr.total) * 70) + 5;
+      setProgress(pct, `Loading… ${Math.round(xhr.loaded/1024)}KB`);
+    }
+  },
+
+  // onError
+  (err) => {
+    console.error('glTF load error:', err);
+    const detail = (err && (err.message || err.toString())) || 'unknown error';
+    showError(
+      `Failed to load scene.gltf: ${detail}\n\n` +
+      'Check: (1) Is the server running? Run: python3 serve.py\n' +
+      '(2) Are you at http://localhost:8086/index.html (not file://...)\n' +
+      '(3) Open the browser Console (F12) for the full error.'
+    );
+    setProgress(0, 'Error — see message below and press F12 for details');
+  }
+);
+
+// Quick connectivity self-test
+fetch('scene.gltf', { method: 'HEAD' })
+  .then(r => {
+    if (!r.ok) showError(`Server returned ${r.status} for scene.gltf — run the converter first, then start serve.py.`);
+  })
+  .catch(() => {
+    showError('Cannot reach scene.gltf. Start the server: open Terminal, cd into GroupDemoRedo, run: python3 serve.py');
+  });
+
+// ─── Viewpoints ───────────────────────────────────────────────────────────
+// Named viewpoints extracted from the VRML (position + orientation)
+const VIEWPOINTS = {
+  'start':       { pos: [1.29068,  2.68232, -1.89133], ori: [-0.307751,-0.948531,-0.0746922,  0.501009] },
+  'startA':      { pos: [0.96747,  2.68232,  1.53967], ori: [-0.249549,-0.965374,-0.0760188,  0.611338] },
+  'startB':      { pos: [3.74907,  2.76879,  2.65117], ori: [-0.0947846,-0.992426,-0.0781499, 1.38649]  },
+  'enterKidsRm': { pos: [5.62564,  2.76879,  3.41331], ori: [0.0264319, 0.996566, 0.0784764,  3.78926]  },
+  '3kids':       { pos: [9.41554,  2.76879,  8.88959], ori: [-0.0885399,-0.992999,-0.0781948, 1.45386]  },
+  'exitKidsRm':  { pos: [6.7402,   3.15741,  7.80932], ori: [-0.521565, 0.850578, 0.066984,   0.2997]   },
+  'Elevator2':   { pos: [10.9285,  2.68232,  2.31518], ori: [-0.0820415,-0.993553,-0.078239,  1.52983]  },
+  'Elevator1':   { pos: [12.2424, -0.289603, 2.90233], ori: [-0.263134,-0.961782,-0.0757363,  0.581568] },
+  'webmetrics':  { pos: [6.49979, -0.669903, 5.27515], ori: [0.000439114,0.999989,0.00458653, 3.33219]  },
+  'DonNormanQ':  { pos: [10.4768, -0.669903, 6.93492], ori: [0.00272195,0.999986,0.00458618,  4.21255]  },
+  'stairs':      { pos: [15.2171, -1.91459,  15.3915], ori: [-0.0973081,0.986523,0.131541,    1.88071]  },
+  'airbag':      { pos: [8.06911,  2.76879,  7.88103], ori: [-0.00724898,0.996888,0.0785019,  2.95798]  },
+  'Elevator3':   { pos: [11.4445,  11.9435,  2.83671], ori: [-0.145424,-0.986316,-0.0776686,  0.992583] },
+  'krev':        { pos: [12.2296,  12.376,   0.949606],ori: [-0.664541, 0.743366, 0.0761116,  0.305731] },
+  'nirve':       { pos: [5.13952,  12.376,  -0.983086],ori: [-0.100978, 0.989715, 0.101332,   1.58462]  },
+};
+
+// Convert VRML axis-angle orientation to Three.js camera look-at
+function vrmlOriToDirection(ori) {
+  const [ax, ay, az, angle] = ori;
+  const q = new THREE.Quaternion();
+  q.setFromAxisAngle(new THREE.Vector3(ax, ay, az), angle);
+  const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(q);
+  return dir;
+}
+
+
+window.goToViewpoint = function(name) {
+  if (!name || !VIEWPOINTS[name]) return;
+  const vp  = VIEWPOINTS[name];
+  const pos = new THREE.Vector3(...vp.pos);
+  const dir = vrmlOriToDirection(vp.ori);
+  const target = pos.clone().add(dir.multiplyScalar(2));
+
+  // Smooth transition
+  animateCameraTo(pos, target, 800);
+  controls.target.copy(target);
+};
+
+function animateCameraTo(newPos, newTarget, durationMs) {
+  const startPos = camera.position.clone();
+  const startTgt = controls.target.clone();
+  const t0 = performance.now();
+
+  function step(now) {
+    const t = Math.min((now - t0) / durationMs, 1);
+    const e = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out quad
+    camera.position.lerpVectors(startPos, newPos, e);
+    controls.target.lerpVectors(startTgt, newTarget, e);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ─── Tour playback ────────────────────────────────────────────────────────
+// VRML has a 274-second tour with dense position+orientation keyframes.
+// We replay this as a simple sequential viewpoint tour.
+const TOUR_STOPS = [
+  'start','startA','startB','enterKidsRm','3kids','exitKidsRm',
+  'airbag','Elevator2','Elevator1','webmetrics','DonNormanQ',
+  'stairs','Elevator3','krev','nirve','start'
+];
+let tourActive   = false;
+let tourIndex    = 0;
+let tourTimer    = null;
+
+window.toggleTour = function() {
+  tourActive = !tourActive;
+  document.getElementById('tourBtn').classList.toggle('active', tourActive);
+  if (tourActive) {
+    doTourStep();
+  } else {
+    clearTimeout(tourTimer);
+  }
+};
+
+function doTourStep() {
+  if (!tourActive) return;
+  const name = TOUR_STOPS[tourIndex % TOUR_STOPS.length];
+  goToViewpoint(name);
+  tourIndex++;
+  tourTimer = setTimeout(doTourStep, 6000);
+}
+
+// ─── Audio ────────────────────────────────────────────────────────────────
+let audioCtx     = null;
+let audioEnabled = false;
+let ambientBuffer = null;
+let ambientSource = null;
+
+const SOUNDS = {
+  breathing:      'breathing.wav',
+  doorchime:      'STTNG-doorchime.wav',
+  doh:            'doh.wav',
+  goesPing:       'goes-ping.wav',
+  anthrokids:     'anthrokids.wav',
+  carnival:       'carnival.wav',
+  grpdemos:       'grpdemos.wav',
+  webmetrics:     'webmetrics.wav',
+};
+
+async function loadAudio(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Cannot fetch ${url}`);
+  const buf  = await resp.arrayBuffer();
+  return await audioCtx.decodeAudioData(buf);
+}
+
+async function startAmbient() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    ambientBuffer = await loadAudio(SOUNDS.breathing);
+    playLoop(ambientBuffer, 0.35);
+    updateAudioStatus('🎵 breathing.wav looping');
+  } catch(e) {
+    console.warn('Audio error:', e);
+  }
+}
+
+function playLoop(buffer, gain=1) {
+  const src  = audioCtx.createBufferSource();
+  const gn   = audioCtx.createGain();
+  src.buffer = buffer;
+  src.loop   = true;
+  gn.gain.value = gain;
+  src.connect(gn).connect(audioCtx.destination);
+  src.start();
+  ambientSource = src;
+  return src;
+}
+
+function updateAudioStatus(msg) {
+  document.getElementById('audio-status').textContent = msg;
+}
+
+window.toggleAudio = function() {
+  const btn = document.getElementById('audioBtn');
+  if (!audioEnabled) {
+    audioEnabled = true;
+    btn.textContent = '🔊 Audio On';
+    btn.classList.add('active');
+    startAmbient();
+  } else {
+    audioEnabled = false;
+    btn.textContent = '🔇 Audio Off';
+    btn.classList.remove('active');
+    if (ambientSource) {
+      try { ambientSource.stop(); } catch(e) {}
+      ambientSource = null;
+    }
+    updateAudioStatus('');
+  }
+};
+
+// ─── Help toggle ──────────────────────────────────────────────────────────
+let helpVisible = false;
+window.toggleHelp = function() {
+  helpVisible = !helpVisible;
+  const hud = document.getElementById('hud');
+  if (helpVisible) {
+    hud.innerHTML = `
+      <strong style="color:#6080c0">Navigation</strong><br>
+      Left drag: orbit &nbsp;|&nbsp; Right drag: pan &nbsp;|&nbsp; Scroll: zoom<br>
+      <strong style="color:#6080c0">Controls</strong><br>
+      ▶ Tour: auto-fly through viewpoints<br>
+      Viewpoint menu: jump to named locations<br>
+      🔊 Audio: toggle ambient sounds<br>
+      <br>
+      <em style="color:#304060">NIST Virtual &amp; Virtual Reality Group, c.1996</em>
+    `;
+  } else {
+    hud.innerHTML = 'Mouse drag: rotate &nbsp;|&nbsp; Scroll: zoom &nbsp;|&nbsp; Right drag: pan';
+  }
+};
+
+// ─── Render loop ──────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+</script>
+</body>
+</html>

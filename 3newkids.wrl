@@ -1,0 +1,36 @@
+#VRML V2.0 utf8
+
+Group {
+  children	[
+    WorldInfo {
+      info	[ "AnthroKids",
+	        "Packaged by CosmoPackage",
+	        "Packaged by CosmoPackage" ]
+    }
+    DEF theKids Transform {
+      children	[
+	Inline {
+	  url	"kid2.wrl"
+	  bboxCenter	-1.23192 60.1991 3.65525
+	  bboxSize	177.628 168.635 131.627
+	}
+	Inline {
+	  url	"kid3.wrl"
+	  bboxCenter	67.3065 93.1681 -10.8569
+	  bboxSize	122.822 219.697 111.155
+	}
+	Inline {
+	  url	"kid1.wrl"
+	  bboxCenter	-79.2826 45.0331 -1.86511
+	  bboxSize	76.889 108.366 65.7065
+	}
+      ]
+    }
+    DEF VP1 Viewpoint {
+      position	5.4952 89.4491 438.074
+      orientation	0 0 1  0
+      fieldOfView	0.785398
+      description	"Main"
+    }
+  ]
+}

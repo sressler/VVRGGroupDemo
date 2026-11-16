@@ -1,0 +1,249 @@
+#VRML V2.0 utf8
+
+WorldInfo {
+  info	[ "Created in CosmoWorlds",
+	    "Packaged by CosmoPackage" ]
+}
+Transform {
+  children	[
+  ]
+}
+Transform {
+  children	[
+  ]
+  translation	2.02028 0 0
+}
+Transform {
+  children	[
+    Transform {
+      children	Shape {
+	appearance	Appearance {
+	  material	DEF _0 Material {
+	    ambientIntensity	0.250001
+	    diffuseColor	0.430504 0.436165 0.440663
+	    specularColor	0.251984 0.251984 0.251984
+	    emissiveColor	0 0 0
+	    shininess	0.684848
+	    transparency	0
+	  }
+
+	  texture	NULL
+
+	  textureTransform	NULL
+
+	}
+
+	geometry	Box {
+	  size	0.182553 0.182554 0.182555
+	}
+
+      }
+
+      translation	-1.05467 -0.249212 -3.15306
+      scale	1 5.55502 1
+    }
+    Transform {
+      children	Shape {
+	appearance	Appearance {
+	  material	USE _0
+
+	  texture	NULL
+
+	  textureTransform	NULL
+
+	}
+
+	geometry	Box {
+	  size	0.182553 0.182554 0.182555
+	}
+
+      }
+
+      translation	-1.05467 -0.249212 -3.80728
+      scale	1 5.55502 1
+    }
+    Transform {
+      children	Shape {
+	appearance	Appearance {
+	  material	USE _0
+
+	  texture	NULL
+
+	  textureTransform	NULL
+
+	}
+
+	geometry	Box {
+	  size	1.06062 1.06062 1.06062
+	}
+
+      }
+
+      translation	-0.0432733 -0.539019 -3.49294
+      rotation	0 0 1  0
+      scale	2.22511 0.113141 0.942847
+    }
+    Transform {
+      children	Shape {
+	appearance	Appearance {
+	  material	USE _0
+
+	  texture	NULL
+
+	  textureTransform	NULL
+
+	}
+
+	geometry	Box {
+	  size	0.182553 0.182554 0.182555
+	}
+
+      }
+
+      translation	0.965604 -0.249212 -3.15306
+      scale	1 5.55502 1
+    }
+    Transform {
+      children	Shape {
+	appearance	Appearance {
+	  material	USE _0
+
+	  texture	NULL
+
+	  textureTransform	NULL
+
+	}
+
+	geometry	Box {
+	  size	0.182553 0.182554 0.182555
+	}
+
+      }
+
+      translation	0.965604 -0.249212 -3.80728
+      scale	1 5.55502 1
+    }
+  ]
+}
+Transform {
+  children	Shape {
+    appearance	Appearance {
+      material	DEF _1 Material {
+	ambientIntensity	0.215686
+	diffuseColor	0.0870338 0.0258875 0
+	specularColor	0.224138 0.104091 0.104091
+	emissiveColor	0 0 0
+	shininess	0.0459184
+	transparency	0
+      }
+
+      texture	NULL
+
+      textureTransform	NULL
+
+    }
+
+    geometry	Box {
+      size	0.2 0.2 0.2
+    }
+
+  }
+
+  translation	-0.485971 0.150695 -3.48948
+  rotation	0.57735 0.57735 -0.57735  2.0944
+  scale	5.74363 4.7628 1
+  scaleOrientation	0 0 1  0
+}
+Transform {
+  children	Shape {
+    appearance	Appearance {
+      material	USE _1
+
+      texture	NULL
+
+      textureTransform	NULL
+
+    }
+
+    geometry	Box {
+      size	0.2 0.2 0.2
+    }
+
+  }
+
+  translation	-0.4857 -0.0698532 -3.48948
+  rotation	-0.57735 -0.57735 0.57735  4.18879
+  scale	5.74363 4.7628 1
+  scaleOrientation	0 0 1  0
+}
+Transform {
+  children	Shape {
+    appearance	Appearance {
+      material	DEF _2 Material {
+	ambientIntensity	0.253334
+	diffuseColor	0.449506 0.31044 0.208933
+	specularColor	0.180851 0.068473 0.0473582
+	emissiveColor	0 0 0
+	shininess	0.0106383
+	transparency	0
+      }
+
+      texture	NULL
+
+      textureTransform	NULL
+
+    }
+
+    geometry	Box {
+      size	0.2 0.2 0.2
+    }
+
+  }
+
+  translation	-1.30304 0.311155 -3.49221
+  scale	0.999975 0.999861 6.23925
+}
+Transform {
+  children	Shape {
+    appearance	Appearance {
+      material	Material {
+      }
+
+      texture	ImageTexture {
+	url	"wood4.png"
+      }
+
+      textureTransform	NULL
+
+    }
+
+    geometry	Box {
+      size	1.06062 1.06062 1.06062
+    }
+
+  }
+
+  translation	-0.0432728 0.291985 -3.49286
+  rotation	0 0 1  0
+  scale	2.22505 0.0766143 1.17653
+}
+Transform {
+  children	Shape {
+    appearance	Appearance {
+      material	USE _2
+
+      texture	NULL
+
+      textureTransform	NULL
+
+    }
+
+    geometry	Box {
+      size	0.2 0.2 0.2
+    }
+
+  }
+
+  translation	1.22956 0.301427 -3.49436
+  scale	0.999975 0.999861 6.23925
+}

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NIST VVRG Group Demo — X_ITE</title>
+<script src="https://cdn.jsdelivr.net/npm/x_ite@16/dist/x_ite.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #0a0a1a; color: #dde6ff; font: 13px system-ui, sans-serif; overflow: hidden; }
+  #bar { height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 12px;
+         background: #13204f; border-bottom: 1px solid #2a3a8a; }
+  #bar h1 { font-size: 13px; font-weight: 600; color: #8ab4ff; margin-right: 8px; white-space: nowrap; }
+  #bar button { background: #1e2e6e; border: 1px solid #3a50b0; color: #cfe0ff; border-radius: 5px;
+                padding: 4px 10px; font-size: 12px; cursor: pointer; }
+  #bar button:hover { background: #2a3e90; }
+  #status { margin-left: auto; color: #8090c0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #main { position: absolute; top: 40px; bottom: 0; left: 0; right: 0; display: flex; }
+  #view { flex: 1; position: relative; min-width: 0; }
+  x3d-canvas { width: 100%; height: 100%; display: block; }
+  #side { width: 34%; min-width: 260px; border-left: 1px solid #2a3a8a; background: #fff; display: flex; flex-direction: column; }
+  #side.hidden { display: none; }
+  #side iframe { flex: 1; border: 0; width: 100%; }
+  #start { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+           gap: 14px; background: rgba(5,8,25,.85); cursor: pointer; z-index: 5; }
+  #start b { font-size: 22px; color: #8ab4ff; }
+  #start span { color: #8090c0; }
+  #start.hidden { display: none; }
+  #drop { position: absolute; inset: 10px; display: none; align-items: center; justify-content: center; z-index: 6;
+          border: 3px dashed #6080e0; border-radius: 12px; background: rgba(20,30,80,.75);
+          color: #cfe0ff; font-size: 18px; pointer-events: none; text-align: center; line-height: 1.6; }
+  #drop.show { display: flex; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <h1>NIST VVRG Group Demo</h1>
+  <button id="tour"  title="Go to the tour viewpoint">Tour</button>
+  <button id="prev"  title="Previous viewpoint (Page Up)">◀ View</button>
+  <button id="next"  title="Next viewpoint (Page Down)">View ▶</button>
+  <button id="first" title="Go to the first viewpoint (Home)">Reset view</button>
+  <button id="panel" title="Show/hide the info panel that Anchors open into">Info panel</button>
+  <div id="keys" style="color:#8090c0;font-size:12px;white-space:nowrap">WASD / arrows · Shift run</div>
+  <div id="status">Loading…</div>
+</div>
+<div id="main">
+  <div id="view">
+    <x3d-canvas src="index.wrl" splashScreen="true" contextMenu="true" notifications="true"></x3d-canvas>
+    <div id="drop"><div>Drop a VRML / X3D / glTF file to view it<br>
+      <small>.wrl · .x3dv · .x3d · .gltf · .glb — drop its textures/sounds along with it if they aren't in this folder</small></div></div>
+    <div id="start"><b>Click to enter</b><span>(enables sound)</span><span>W/S or ↑/↓ move · A/D strafe · ←/→ turn · Shift = run · mouse drag also works · right‑click for viewpoints</span></div>
+  </div>
+  <div id="side">
+    <!-- VRML Anchors with parameter "target=right" open here, as in the original frameset -->
+    <iframe name="right" src="help.html"></iframe>
+  </div>
+</div>
+<script>
+  const canvas  = document.querySelector("x3d-canvas");
+  const status  = document.getElementById("status");
+  const start   = document.getElementById("start");
+  const side    = document.getElementById("side");
+  const ready   = () => canvas.browser;
+
+  function showWorld () {
+    const B = ready(); if (!B) return;
+    const url = String(B.currentScene?.worldURL || "").split("/").pop();
+    status.textContent = url ? "World: " + url : "";
+  }
+
+  // Unlock Web Audio on the first click (browser autoplay policy).
+  start.addEventListener("click", () => {
+    start.classList.add("hidden");
+    try {
+      const B = ready();
+      const ctx = B?.getAudioContext?.();
+      ctx?.resume?.();
+    } catch (e) { console.warn(e); }
+    canvas.focus();
+  });
+
+  document.getElementById("tour").onclick  = () => {
+    try { ready().currentScene.getNamedNode("tour_3").set_bind = true; }
+    catch (e) { console.warn("Tour viewpoint not found", e); }
+    canvas.focus();
+  };
+  document.getElementById("prev").onclick  = () => ready()?.previousViewpoint();
+  document.getElementById("next").onclick  = () => ready()?.nextViewpoint();
+  document.getElementById("first").onclick = () => ready()?.firstViewpoint();
+  document.getElementById("panel").onclick = () => side.classList.toggle("hidden");
+
+
+  // ── Keyboard navigation: W/S ↑/↓ forward/back, A/D strafe, ←/→ turn, Shift = run ──
+  // Moves the bound Viewpoint's user offset the same way X_ITE's Walk viewer does,
+  // including its collision test, so you still can't walk through walls.
+  const held = new Set();
+  const NAV_KEYS = { KeyW:1, KeyA:1, KeyS:1, KeyD:1, ArrowUp:1, ArrowDown:1, ArrowLeft:1, ArrowRight:1 };
+  const typing = e => /^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName) || e.target?.isContentEditable;
+
+  window.addEventListener("keydown", e => {
+    if (typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (NAV_KEYS[e.code]) { held.add(e.code); e.preventDefault(); }
+    if (e.key === "Shift") held.add("Shift");
+  }, true);
+  window.addEventListener("keyup", e => { held.delete(e.code); if (e.key === "Shift") held.delete("Shift"); }, true);
+  window.addEventListener("blur", () => held.clear());
+
+  const MOVE_SPEED = 2.0;          // metres per second (× NavigationInfo.speed)
+  const TURN_SPEED = Math.PI / 2;  // radians per second
+  const RUN_FACTOR = 3;
+  let lastT = performance.now();
+
+  function navStep (now)
+  {
+    const dt = Math.min((now - lastT) / 1000, 0.1);
+    lastT = now;
+    requestAnimationFrame(navStep);
+
+    if (!held.size || (held.size === 1 && held.has("Shift"))) return;
+    try {
+      const B     = canvas.browser;
+      const layer = B?.getActiveLayer?.();
+      const vp    = layer?.getViewpoint?.();
+      const nav   = layer?.getNavigationInfo?.();
+      if (!vp || !nav) return;
+
+      const f    = (held.has("KeyW") || held.has("ArrowUp")    ? 1 : 0) - (held.has("KeyS") || held.has("ArrowDown")  ? 1 : 0);
+      const side = (held.has("KeyD") ? 1 : 0) - (held.has("KeyA") ? 1 : 0);
+      const turn = (held.has("ArrowLeft") ? 1 : 0) - (held.has("ArrowRight") ? 1 : 0);
+      const run  = held.has("Shift") ? RUN_FACTOR : 1;
+
+      const ori = vp.getUserOrientation();          // X_ITE Rotation4
+      const V3  = vp.getUserPosition().constructor; // X_ITE Vector3 class
+      const R4  = ori.constructor;
+      const up  = new V3().assign(vp.getUpVector());
+
+      if (turn) {
+        const yaw = new R4(up.x, up.y, up.z, turn * TURN_SPEED * run * dt);
+        vp.setUserOrientation(ori.copy().multRight(yaw));
+      }
+
+      if (f || side) {
+        const o   = vp.getUserOrientation();
+        const fwd = o.multVecRot(new V3(0, 0, -1));
+        fwd.subtract(new V3().assign(up).multiply(fwd.dot(up))).normalize();  // keep level
+        const right = new V3().assign(fwd).cross(up).normalize();
+        const speed = MOVE_SPEED * Math.max(nav._speed.getValue(), 0.1) * vp.getSpeedFactor() * run * dt;
+        const t = fwd.multiply(f).add(right.multiply(side));
+        if (t.norm() > 0) t.normalize().multiply(speed);
+        const moved = layer.constrainTranslation(t);
+        vp._positionOffset = moved.add(vp._positionOffset.getValue());
+      }
+    } catch (err) { console.warn("keyboard nav:", err); }
+  }
+  requestAnimationFrame(navStep);
+
+
+  // Overall lighting level (X_ITE "Exposure"); 1 = original, 0.65 tames the hot scenes.
+  const LIGHTING = 0.65;
+
+
+  // ── Drag-and-drop: drop a .wrl/.x3dv/.x3d/.gltf/.glb anywhere on the page to load it ──
+  // Relative URLs in the dropped world resolve against this folder (so textures, sounds and
+  // Inlines that live here are found). Any other files dropped at the same time (textures,
+  // sounds, inlined .wrl) are substituted for references to them by file name.
+  const dropBox  = document.getElementById("drop");
+  const WORLD_RE = /\.(wrl|wrz|vrml|x3dv|x3d|x3dz|x3dj|json|gltf|glb|obj|stl|ply)$/i;
+  const TEXT_RE  = /\.(wrl|vrml|x3dv|x3d|x3dj|json)$/i;
+  let dragDepth = 0, blobURLs = [];
+
+  const hasFiles = e => [...(e.dataTransfer?.types || [])].includes("Files");
+  window.addEventListener("dragenter", e => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; dropBox.classList.add("show"); });
+  window.addEventListener("dragover",  e => { if (!hasFiles(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = "copy"; });
+  window.addEventListener("dragleave", e => { if (!hasFiles(e)) return; if (--dragDepth <= 0) { dragDepth = 0; dropBox.classList.remove("show"); } });
+  window.addEventListener("drop", async e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    dragDepth = 0; dropBox.classList.remove("show");
+    const files = [...e.dataTransfer.files];
+    const world = files.find(f => WORLD_RE.test(f.name));
+    if (!world) { status.textContent = "Not a 3D file: " + (files[0]?.name || "?"); return; }
+    start.classList.add("hidden");
+    try { canvas.browser?.getAudioContext?.()?.resume?.(); } catch (_) {}
+    await loadDropped(world, files.filter(f => f !== world));
+  });
+
+  async function loadDropped (world, extras)
+  {
+    const B = canvas.browser;
+    status.textContent = "Loading " + world.name + "…";
+    blobURLs.forEach(u => URL.revokeObjectURL(u));
+    blobURLs = [];
+    try {
+      if (TEXT_RE.test(world.name)) {
+        let text = await world.text();
+        for (const f of extras) {             // point references like "face.jpg" at the dropped copy
+          const u = URL.createObjectURL(f); blobURLs.push(u);
+          const esc = f.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          text = text.replace(new RegExp(`(["'])((?:[^"']*/)?${esc})\\1`, "g"), `$1${u}$1`);
+        }
+        const scene = await B.createX3DFromString(text);
+        try { scene.setWorldURL?.(new URL(world.name, location.href)); } catch (_) {}
+        await B.replaceWorld(scene);
+      } else {                                // binary / other formats: hand X_ITE a blob URL
+        const u = URL.createObjectURL(world); blobURLs.push(u);
+        await B.loadURL(new X3D.MFString(u + "#" + world.name));
+      }
+      B.setBrowserOption("Exposure", LIGHTING);
+      // No Viewpoint in the file? Frame the whole model so it isn't off-camera.
+      await new Promise(r => setTimeout(r, 300));
+      try {
+        const layer = B.getActiveLayer();
+        if (layer && layer.getViewpoint() === layer.defaultViewpoint) B.viewAll(0);
+      } catch (_) {}
+      status.textContent = "Dropped: " + world.name;
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Couldn't load " + world.name + " — " + (err?.message || err);
+    }
+  }
+
+  X3D(() => {
+    const B = canvas.browser;
+    B.addBrowserCallback("status", X3D.X3DConstants.INITIALIZED_EVENT, showWorld);
+    B.addBrowserCallback("status-err", X3D.X3DConstants.CONNECTION_ERROR, () => status.textContent = "Load error — is serve.py running?");
+    B.setBrowserOption("Exposure", LIGHTING);
+    showWorld();
+  });
+</script>
+</body>
+</html>

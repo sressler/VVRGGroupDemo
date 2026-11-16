@@ -1,0 +1,3159 @@
+#VRML V2.0 utf8
+
+WorldInfo {
+  info	[ "Created in CosmoWorlds",
+	    "Packaged by CosmoPackage" ]
+}
+Group {
+  children	[
+    DEF ElevatorStuff Transform {
+      children	[
+	DEF from1to2time TimeSensor {
+	  cycleInterval	3
+	  loop	FALSE
+	  startTime	0
+	}
+	DEF from2to3time TimeSensor {
+	  cycleInterval	9
+	  loop	FALSE
+	  startTime	0
+	}
+	DEF from1to3time TimeSensor {
+	  cycleInterval	9
+	  loop	FALSE
+	  startTime	0
+	}
+	DEF OPENER TimeSensor {
+	  cycleInterval	8
+	  loop	FALSE
+	  startTime	0
+	}
+	DEF FirstFloorLeftTranslationInterp PositionInterpolator {
+	  key	[ 0, 0.125, 0.875, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 0 -1.5,
+		    0 0 -1.5,
+		    0 0 0 ]
+	}
+	DEF FirstFloorRightTranslationInterp PositionInterpolator {
+	  key	[ 0, 0.125, 0.875, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 0 1.5,
+		    0 0 1.5,
+		    0 0 0 ]
+	}
+	DEF BVdoorsLeftTranslationInterp PositionInterpolator {
+	  key	[ 0, 0.125, 0.875, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 0 -1.5,
+		    0 0 -1.5,
+		    0 0 0 ]
+	}
+	DEF BVdoorsRightTranslationInterp PositionInterpolator {
+	  key	[ 0, 0.125, 0.875, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 0 1.5,
+		    0 0 1.5,
+		    0 0 0 ]
+	}
+	DEF thirdDoorsLeftTranslationInterp PositionInterpolator {
+	  key	[ 0, 0.125, 0.875, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 0 -1.5,
+		    0 0 -1.5,
+		    0 0 0 ]
+	}
+	DEF thirdDoorsRightTranslationInterp PositionInterpolator {
+	  key	[ 0, 0.125, 0.875, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 0 1.5,
+		    0 0 1.5,
+		    0 0 0 ]
+	}
+	DEF hissDoorsUpperTranslationInterp PositionInterpolator {
+	  key	[ 0, 0.02, 0.145, 0.895,
+		    0.98, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 0 0,
+		    0 1.2 0,
+		    0 1.2 0,
+		    0 0 0,
+		    0 0 0 ]
+	}
+	DEF hissDoorsLowerTranslationInterp PositionInterpolator {
+	  key	[ 0, 0.02, 0.145, 0.895,
+		    0.98, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 0 0,
+		    0 -1.3 0,
+		    0 -1.3 0,
+		    0 0 0,
+		    0 0 0 ]
+	}
+	DEF from1to2invert ScalarInterpolator {
+	  key	[ 0, 1 ]
+	  keyValue	[ 1, 0 ]
+	}
+	DEF from1to2interp PositionInterpolator {
+	  key	[ 0, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 3.025 0 ]
+	}
+	DEF from2to3invert ScalarInterpolator {
+	  key	[ 0, 1 ]
+	  keyValue	[ 0, 1 ]
+	}
+	DEF from2to3interp PositionInterpolator {
+	  key	[ 0, 1 ]
+	  keyValue	[ 0 3.025 0,
+		    0 12.025 0 ]
+	}
+	DEF from1to3invert ScalarInterpolator {
+	  key	[ 0, 1 ]
+	  keyValue	[ 0, 1 ]
+	}
+	DEF from1to3interp PositionInterpolator {
+	  key	[ 0, 1 ]
+	  keyValue	[ 0 0 0,
+		    0 12.025 0 ]
+	}
+	DEF CONTROL Script {
+	  eventOut	  SFFloat	  door1
+	  eventOut	  SFFloat	  door2
+	  eventOut	  SFFloat	  door3
+	  eventOut	  MFFloat	  invert1to2
+	  eventOut	  MFFloat	  invert2to3
+	  eventOut	  SFTime	  start1to2
+	  eventOut	  SFTime	  start2to3
+	  eventOut	  SFVec3f	  elevDestFloorHeight
+	  eventOut	  SFTime	  start1to3
+	  eventOut	  MFFloat	  invert1to3
+	  eventOut	  SFTime	  startElevOutsideDoorOpener
+	  eventIn	  SFFloat	  set_fraction
+	  eventIn	  SFTime	  floor1
+	  eventIn	  SFTime	  floor3
+	  eventIn	  SFBool	  doorsClosing
+	  eventIn	  SFBool	  elevMoving
+	  eventIn	  SFTime	  secondFloorRequest
+	  eventIn	  SFTime	  thirdFloorRequest
+	  eventIn	  SFTime	  firstFloorRequest
+	  eventIn	  SFTime	  openElevOutsideDoors
+	  field	  MFFloat	  direct	[ 0, 1 ]
+	  field	  MFFloat	  inverse	[ 1, 0 ]
+	  field	  SFInt32	  curfloor	2
+	  field	  SFInt32	  curdest	2
+	  field	  SFInt32	  pending	2
+	  field	  SFBool	  waiting	FALSE
+	  field	  MFVec3f	  floorHeights	[ 0 0 0,
+		    0 3.025 0,
+		    0 12.025 0 ]
+	  url "javascript:
+var moving = false;
+var doorsBusy = false;
+function openDoors (t) { doorsBusy = true; startElevOutsideDoorOpener = t; }
+function go (dest, t)
+{
+   pending = dest;
+   if (moving || doorsBusy) return;
+   if (dest == curfloor) { openDoors (t); return; }
+   curdest = dest;
+   moving  = true;
+   var kv = dest > curfloor ? direct : inverse;
+   var lo = Math .min (curfloor, dest), hi = Math .max (curfloor, dest);
+   if (lo == 1 && hi == 2)      { invert1to2 = kv; start1to2 = t; }
+   else if (lo == 2 && hi == 3) { invert2to3 = kv; start2to3 = t; }
+   else                         { invert1to3 = kv; start1to3 = t; }
+}
+function set_fraction (f, t)
+{
+   if (curfloor == 1) door1 = f;
+   else if (curfloor == 2) door2 = f;
+   else door3 = f;
+}
+function doorsClosing (active, t)
+{
+   if (active) return;
+   doorsBusy = false;
+   if (pending != curfloor) go (pending, t);
+}
+function elevMoving (active, t)
+{
+   if (active || !moving) return;
+   moving   = false;
+   curfloor = curdest;
+   elevDestFloorHeight = floorHeights [curfloor - 1];
+   openDoors (t);
+}
+function floor1 (v, t)             { go (1, t); }
+function floor3 (v, t)             { go (3, t); }
+function firstFloorRequest (v, t)  { go (1, t); }
+function secondFloorRequest (v, t) { go (2, t); }
+function thirdFloorRequest (v, t)  { go (3, t); }
+function openElevOutsideDoors (v, t) { go (curfloor, t); }
+"
+	}
+	DEF dooropen Sound {
+	  source	DEF dooropen_19 AudioClip {
+	    url	"STTNG-doorchime.wav"
+	    startTime	0
+	  }
+
+	  location	0 0 0
+	  direction	0 0 1
+	  minFront	13.8
+	  maxFront	138
+	  minBack	13.8
+	  maxBack	138
+	  spatialize	FALSE
+	}
+	DEF anthrokids Sound {
+	  source	DEF X_Sound_1clip_20 AudioClip {
+	    url	"anthrokids.wav"
+	    startTime	0
+	  }
+
+	  location	0 0 0
+	  direction	0 0 1
+	  minFront	48.5
+	  maxFront	485
+	  minBack	48.5
+	  maxBack	485
+	  spatialize	FALSE
+	}
+	DEF webmetrics Sound {
+	  source	DEF webmetrics_21 AudioClip {
+	    url	"webmetrics.wav"
+	    startTime	0
+	  }
+
+	  location	0 0 0
+	  direction	0 0 1
+	  minFront	55
+	  maxFront	550
+	  minBack	55
+	  maxBack	550
+	  spatialize	FALSE
+	}
+	DEF grpdemos Sound {
+	  source	DEF group_demos AudioClip {
+	    url	"grpdemos.wav"
+	    startTime	0
+	  }
+
+	  location	0 0 0
+	  direction	0 0 1
+	  minFront	53.2
+	  maxFront	532
+	  minBack	53.2
+	  maxBack	532
+	  spatialize	FALSE
+	}
+	DEF theElevator Transform {
+	  children	[
+	    DEF elevatorRoof Transform {
+	      children	Group {
+		children	Shape {
+		  appearance	Appearance {
+		    material	Material {
+		      ambientIntensity	0.437209
+		      diffuseColor	0.294456 0.354559 0.457447
+		      specularColor	0 0 0
+		      emissiveColor	0 0 0
+		      shininess	0.2
+		      transparency	0
+		    }
+
+		    texture	NULL
+
+		    textureTransform	NULL
+
+		  }
+
+		  geometry	IndexedFaceSet {
+		    coord	Coordinate {
+		      point	[ 16.875 1 1.125,
+			        13.3125 1 1.125,
+			        13.3125 1 4.125,
+			        16.875 1 4.125 ]
+		    }
+
+		    color	NULL
+
+		    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+		    colorIndex	[  ]
+		    normal	NULL
+
+		    texCoord	NULL
+
+		    normalPerVertex	FALSE
+		    ccw	FALSE
+		    solid	FALSE
+		    creaseAngle	0.0872665
+		  }
+
+		}
+
+	      }
+
+	      center	15.0938 1 2.625
+	    }
+	    DEF elevatorFloorButtons Transform {
+	      children	[
+		Transform {
+		  children	[
+		    DEF BUT1 TouchSensor {
+		    }
+		    DEF BUTTONSHAPE_25 Shape {
+		      appearance	Appearance {
+			material	Material {
+			  diffuseColor	1 0 0
+			  emissiveColor	0.3 0 0
+			}
+
+			texture	NULL
+
+			textureTransform	NULL
+
+		      }
+
+		      geometry	Cylinder {
+			radius	0.03
+			height	0.04
+		      }
+
+		    }
+		  ]
+		  translation	0 0 0.1
+		}
+		Transform {
+		  children	[
+		    DEF BUT2 TouchSensor {
+		    }
+		    USE BUTTONSHAPE_25
+		  ]
+		}
+		Transform {
+		  children	[
+		    DEF BUT3 TouchSensor {
+		    }
+		    USE BUTTONSHAPE_25
+		  ]
+		  translation	0 0 -0.1
+		}
+	      ]
+	      translation	13.3 -0.5 1.125
+	      rotation	1 0 0  1.5708
+	      scale	1 1 1
+	    }
+	    DEF elevatorFloor Transform {
+	      children	Group {
+		children	Shape {
+		  appearance	Appearance {
+		    material	Material {
+		      ambientIntensity	0.318182
+		      diffuseColor	0.150652 0.181402 0.234043
+		      specularColor	0 0 0
+		      emissiveColor	0 0 0
+		      shininess	0.2
+		      transparency	0
+		    }
+
+		    texture	NULL
+
+		    textureTransform	NULL
+
+		  }
+
+		  geometry	IndexedFaceSet {
+		    coord	Coordinate {
+		      point	[ 13.125 -1.75 1.125,
+			        13.125 -1.75 4.125,
+			        16.875 -1.75 4.125,
+			        16.875 -1.75 1.125 ]
+		    }
+
+		    color	NULL
+
+		    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+		    colorIndex	[  ]
+		    normal	NULL
+
+		    texCoord	NULL
+
+		    normalPerVertex	FALSE
+		    solid	FALSE
+		    creaseAngle	0.0872665
+		  }
+
+		}
+
+	      }
+
+	      center	15 -1.75 2.625
+	    }
+	    DEF elevatorOutsideBox Transform {
+	      children	Group {
+		children	Shape {
+		  appearance	Appearance {
+		    material	Material {
+		      ambientIntensity	0.437209
+		      diffuseColor	0.294456 0.354559 0.457447
+		      specularColor	0 0 0
+		      emissiveColor	0 0 0
+		      shininess	0.2
+		      transparency	0
+		    }
+
+		    texture	NULL
+
+		    textureTransform	NULL
+
+		  }
+
+		  geometry	IndexedFaceSet {
+		    coord	Coordinate {
+		      point	[ 13.0625 1 1.125,
+			        13.0625 -1.75 1.125,
+			        16.875 -1.75 1.125,
+			        16.875 1 1.125,
+			        16.875 -1.75 4.125,
+			        16.875 1 4.125,
+			        13.0625 -1.75 4.125,
+			        13.0625 1 4.125 ]
+		    }
+
+		    color	NULL
+
+		    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+			      3, 2, 4, -1, 3, 4, 5, -1,
+			      5, 4, 6, -1, 5, 6, 7, -1 ]
+		    colorIndex	[  ]
+		    normal	NULL
+
+		    texCoord	NULL
+
+		    normalPerVertex	FALSE
+		    solid	TRUE
+		    creaseAngle	0.0872665
+		  }
+
+		}
+
+	      }
+
+	      center	14.9688 -0.375 2.625
+	    }
+	    DEF elevatorDoors Transform {
+	      children	[
+		DEF elevatorDoorsLower Transform {
+		  children	Group {
+		    children	[
+		      Shape {
+			appearance	Appearance {
+			  material	Material {
+			    ambientIntensity	0
+			    diffuseColor	0.159574 0.111358 0.069227
+			    specularColor	0 0 0
+			    emissiveColor	0 0 0
+			    shininess	0.2
+			    transparency	0
+			  }
+
+			  texture	NULL
+
+			  textureTransform	NULL
+
+			}
+
+			geometry	IndexedFaceSet {
+			  coord	Coordinate {
+			    point	[ 13.144 -0.5 1.125,
+				      13.144 -0.5 4.125,
+				      13.144 -0.375 4.125,
+				      13.144 -0.375 1.125,
+				      13.1015 -0.5 1.125,
+				      13.1015 -0.5 4.125,
+				      13.1015 -0.375 4.125,
+				      13.1015 -0.375 1.125 ]
+			  }
+
+			  color	NULL
+
+			  coordIndex	[ 3, 0, 4, 7, -1, 0, 1, 5,
+				    4, -1, 1, 2, 6, 5, -1, 2,
+				    3, 7, 6, -1, 3, 2, 1, 0,
+				    -1, 4, 5, 6, 7, -1 ]
+			  colorIndex	[  ]
+			  normal	NULL
+
+			  texCoord	NULL
+
+			  normalPerVertex	FALSE
+			  solid	TRUE
+			  creaseAngle	0.0872665
+			}
+
+		      }
+		      Transform {
+			children	Group {
+			  children	Shape {
+			    appearance	Appearance {
+			      material	Material {
+				ambientIntensity	0
+				diffuseColor	0.189716 0.102515 0.0503601
+				specularColor	0 0 0
+				emissiveColor	0 0 0
+				shininess	0.0111111
+				transparency	0.472222
+			      }
+
+			      texture	NULL
+
+			      textureTransform	NULL
+
+			    }
+
+			    geometry	IndexedFaceSet {
+			      coord	Coordinate {
+				point	[ 13.125 -0.5 4.125,
+					  13.125 -1.75 4.125,
+					  13.125 -1.75 1.125,
+					  13.125 -0.5 1.125 ]
+			      }
+
+			      color	NULL
+
+			      coordIndex	[ 0, 1, 2, 3, -1 ]
+			      colorIndex	[  ]
+			      normal	NULL
+
+			      texCoord	NULL
+
+			      normalPerVertex	FALSE
+			      solid	FALSE
+			      creaseAngle	0.0872665
+			    }
+
+			  }
+
+			}
+
+			center	13.125 -1.125 2.625
+		      }
+		    ]
+		  }
+
+		  translation	0 0 0
+		  center	13.1227 -0.4375 2.625
+		}
+		DEF elevatorDoorsUpper Transform {
+		  children	Group {
+		    children	[
+		      Shape {
+			appearance	Appearance {
+			  material	Material {
+			    ambientIntensity	1.04445
+			    diffuseColor	0.191489 0.155692 0.113467
+			    specularColor	0 0 0
+			    emissiveColor	0 0 0
+			    shininess	0.2
+			    transparency	0
+			  }
+
+			  texture	NULL
+
+			  textureTransform	NULL
+
+			}
+
+			geometry	IndexedFaceSet {
+			  coord	Coordinate {
+			    point	[ 13.144 -0.375 1.125,
+				      13.144 -0.375 4.125,
+				      13.144 -0.25 4.125,
+				      13.144 -0.25 1.125,
+				      13.1015 -0.375 1.125,
+				      13.1015 -0.375 4.125,
+				      13.1015 -0.25 4.125,
+				      13.1015 -0.25 1.125 ]
+			  }
+
+			  color	NULL
+
+			  coordIndex	[ 3, 0, 4, 7, -1, 0, 1, 5,
+				    4, -1, 1, 2, 6, 5, -1, 2,
+				    3, 7, 6, -1, 3, 2, 1, 0,
+				    -1, 4, 5, 6, 7, -1 ]
+			  colorIndex	[  ]
+			  normal	NULL
+
+			  texCoord	NULL
+
+			  normalPerVertex	FALSE
+			  solid	TRUE
+			  creaseAngle	0.0872665
+			}
+
+		      }
+		      Transform {
+			children	Group {
+			  children	Shape {
+			    appearance	Appearance {
+			      material	Material {
+				ambientIntensity	0.0580246
+				diffuseColor	0.191489 0.104978 0.0528179
+				specularColor	0 0 0
+				emissiveColor	0 0 0
+				shininess	0.0111111
+				transparency	0.472222
+			      }
+
+			      texture	NULL
+
+			      textureTransform	NULL
+
+			    }
+
+			    geometry	IndexedFaceSet {
+			      coord	Coordinate {
+				point	[ 13.125 1 4.125,
+					  13.125 -0.25 4.125,
+					  13.125 -0.25 1.125,
+					  13.125 1 1.125 ]
+			      }
+
+			      color	NULL
+
+			      coordIndex	[ 0, 1, 2, 3, -1 ]
+			      colorIndex	[  ]
+			      normal	NULL
+
+			      texCoord	NULL
+
+			      normalPerVertex	FALSE
+			      solid	FALSE
+			      creaseAngle	0.0872665
+			    }
+
+			  }
+
+			}
+
+			center	13.125 0.375 2.625
+		      }
+		    ]
+		  }
+
+		  translation	0 0 0
+		  center	13.1202 -0.3125 2.625
+		}
+	      ]
+	      center	13.1227 -0.375 2.625
+	    }
+	    DEF VP_Elevator Viewpoint {
+	      position	15.3894 -0.124519 2.48522
+	      orientation	-0.0865268 0.993175 0.0782105  1.47672
+	      fieldOfView	0.785398
+	      description	"In The Elevator"
+	    }
+	    DEF elevatorProximitySensor Transform {
+	      children	DEF _31 ProximitySensor {
+		center	14.4244 -0.4 2.325
+		size	3.8125 2.75 3.02
+	      }
+
+	      translation	0.331219 0.103195 0.252576
+	      rotation	0 0 1  0
+	      scale	0.992816 0.992816 0.992815
+	      center	0 0 0
+	    }
+	    Transform {
+	      children	DEF elevatorMusic Sound {
+		source	DEF X_Sound_1clip_32 AudioClip {
+		  url	"carnival.wav"
+		  loop	TRUE
+		  startTime	0
+		  stopTime	0
+		  description	"Carnival Sound Clip"
+		}
+
+		location	14.6966 -0.348403 2.47
+		direction	0 0 1
+		minFront	2
+		maxFront	3
+		minBack	2
+		maxBack	3
+	      }
+
+	      translation	0.13278 0.0257628 0
+	    }
+	  ]
+	  translation	0 3.025 0
+	  center	14.9688 -0.375 2.625
+	}
+	DEF elevatorSurroundings Transform {
+	  children	[
+	    DEF enterWorldTimeSensor TimeSensor {
+	      cycleInterval	1
+	      enabled	TRUE
+	      loop	TRUE
+	      startTime	1
+	      stopTime	0
+	    }
+	    DEF enterWorldScript Script {
+	      eventOut	      SFTime	      startTime
+	      eventOut	      SFBool	      firstTime
+	      eventIn	      SFTime	      triggerIn
+	      url "javascript:
+function triggerIn (t) { startTime = t; firstTime = false; }
+"
+	    }
+	    DEF _NoNameNavInfo1 NavigationInfo {
+	      headlight	FALSE
+	      type	[ "ANY",
+		        "WALK" ]
+	    }
+	    DEF elevatorShaft Transform {
+	      children	Group {
+		children	Shape {
+		  appearance	Appearance {
+		    material	DEF _35 Material {
+		      ambientIntensity	0.25
+		      diffuseColor	0.8 0.8 0.8
+		      specularColor	0 0 0
+		      emissiveColor	0 0 0
+		      shininess	0.2
+		      transparency	0
+		    }
+
+		    texture	NULL
+
+		    textureTransform	NULL
+
+		  }
+
+		  geometry	IndexedFaceSet {
+		    coord	Coordinate {
+		      point	[ 13 -2.5 1,
+			        17 -2.5 1,
+			        17 -2.5 4.25,
+			        13 -2.5 4.25,
+			        13 13.25 4.25,
+			        17 13.25 4.25,
+			        17 13.25 1,
+			        13 13.25 1 ]
+		    }
+
+		    color	NULL
+
+		    coordIndex	[ 3, 2, 1, -1, 3, 1, 0, -1,
+			      7, 6, 5, -1, 7, 5, 4, -1,
+			      5, 6, 1, -1, 5, 1, 2, -1,
+			      4, 5, 2, -1, 4, 2, 3, -1,
+			      6, 7, 0, -1, 6, 0, 1, -1 ]
+		    colorIndex	[  ]
+		    normal	NULL
+
+		    texCoord	NULL
+
+		    colorPerVertex	FALSE
+		    normalPerVertex	FALSE
+		    solid	TRUE
+		    creaseAngle	0.0872665
+		  }
+
+		}
+
+	      }
+
+	    }
+	    DEF X_LODhissRumK Transform {
+	      children	LOD {
+		center	12 -0.5 2.5
+		range	1000
+		level	[
+		  DEF K Transform {
+		    children	[
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	DEF _36 ImageTexture {
+			      url	"wood.jpg"
+			    }
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 -1.75 0.5,
+				        11 -1.75 4.75,
+				        13 -1.75 4.75,
+				        13 -1.75 0.5,
+				        11 -1.75 2.5,
+				        10.5 -1.75 2.5,
+				        11 -1.75 0.75,
+				        10.5 -1.75 0.75,
+				        13 -1.75 4.25,
+				        13 -1.75 1 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 6, 7, 5, -1, 6, 5, 4, -1,
+				      4, 1, 2, -1, 4, 2, 8, -1,
+				      4, 8, 9, -1, 4, 9, 3, -1,
+				      3, 0, 6, -1, 3, 6, 4, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 10.5 -1.75 2.5,
+				        11 -1.75 2.5,
+				        10.5 0 2.5,
+				        11 0 2.5,
+				        10.5 0.25 2.25,
+				        11 0.25 2.25,
+				        10.5 0.25 1,
+				        11 0.25 1,
+				        10.5 0 0.75,
+				        11 0 0.75,
+				        10.5 -1.75 0.75,
+				        11 -1.75 0.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 2, 1, 3, -1,
+				      2, 3, 4, -1, 4, 3, 5, -1,
+				      4, 5, 6, -1, 6, 5, 7, -1,
+				      6, 7, 8, -1, 8, 7, 9, -1,
+				      8, 9, 10, -1, 10, 9, 11, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    ccw	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 -1.75 4.75,
+				        11 -1.75 2.5,
+				        11 0 2.5,
+				        11 0.25 2.25,
+				        11 0.25 1,
+				        11 0 0.75,
+				        11 -1.75 0.75,
+				        11 -1.75 0.5,
+				        11 1 0.5,
+				        11 1 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+				      5, 6, 7, -1, 5, 7, 8, -1,
+				      9, 0, 3, -1, 9, 3, 4, -1,
+				      4, 5, 8, -1, 4, 8, 9, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 -1.75 0.5,
+				        13 -1.75 0.5,
+				        11 1 0.5,
+				        13 1 0.5 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 2, 1, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 1 4.75,
+				        13 -1.75 4.75,
+				        11 -1.75 4.75,
+				        11 1 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 1 4.75,
+				        11 1 0.5,
+				        13 1 0.5,
+				        13 1 1,
+				        13 1 4.25,
+				        13 1 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+				      0, 3, 4, -1, 0, 4, 5, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 1 0.5,
+				        13 -1.75 0.5,
+				        13 -1.75 1,
+				        13 1 1 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 1 4.25,
+				        13 -1.75 4.25,
+				        13 -1.75 4.75,
+				        13 1 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      DEF Kdoors Transform {
+			children	[
+			  Group {
+			    children	DEF hissAnimation Group {
+			      children	DEF Time TimeSensor {
+				cycleInterval	64
+				loop	TRUE
+				startTime	0
+				stopTime	1
+			      }
+
+			    }
+
+			  }
+			  DEF firstFloorLeft Transform {
+			    children	Group {
+			      children	[
+				Shape {
+				  appearance	Appearance {
+				    material	Material {
+				      ambientIntensity	0
+				      diffuseColor	0.148936 0.133423 0.0994609
+				      specularColor	0 0 0
+				      emissiveColor	0 0 0
+				      shininess	0
+				      transparency	0
+				    }
+
+				    texture	NULL
+
+				    textureTransform	NULL
+
+				  }
+
+				  geometry	IndexedFaceSet {
+				    coord	Coordinate {
+				      point	[ 13.0815 1 2.5,
+					        13.0815 -1.75 2.5,
+					        13.0815 -1.75 2.625,
+					        13.0815 1 2.625,
+					        13.039 1 2.5,
+					        13.039 -1.75 2.5,
+					        13.039 -1.75 2.625,
+					        13.039 1 2.625 ]
+				    }
+
+				    color	NULL
+
+				    coordIndex	[ 4, 5, 6, -1, 4, 6, 7, -1,
+					      0, 1, 5, -1, 0, 5, 4, -1,
+					      3, 2, 1, -1, 3, 1, 0, -1,
+					      2, 3, 7, -1, 2, 7, 6, -1 ]
+				    colorIndex	[  ]
+				    normal	NULL
+
+				    texCoord	NULL
+
+				    normalPerVertex	FALSE
+				    solid	TRUE
+				    creaseAngle	0.0872665
+				  }
+
+				}
+				Group {
+				  children	Shape {
+				    appearance	Appearance {
+				      material	Material {
+					ambientIntensity	0
+					diffuseColor	0.191489 0.101995 0.0492503
+					specularColor	0 0 0
+					emissiveColor	0 0 0
+					shininess	0
+					transparency	0.5
+				      }
+
+				      texture	NULL
+
+				      textureTransform	NULL
+
+				    }
+
+				    geometry	IndexedFaceSet {
+				      coord	Coordinate {
+					point	[ 13.0625 1 2.5,
+						  13.0625 -1.75 2.5,
+						  13.0625 -1.75 1,
+						  13.0625 1 1 ]
+				      }
+
+				      color	NULL
+
+				      coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+				      colorIndex	[  ]
+				      normal	NULL
+
+				      texCoord	NULL
+
+				      normalPerVertex	FALSE
+				      solid	FALSE
+				      creaseAngle	0.0872665
+				    }
+
+				  }
+
+				}
+			      ]
+			    }
+
+			    translation	0 0 0
+			    center	13.0602 -0.375 1.8125
+			  }
+			  DEF firstFloorRight Transform {
+			    children	Group {
+			      children	[
+				Shape {
+				  appearance	Appearance {
+				    material	Material {
+				      ambientIntensity	0
+				      diffuseColor	0.191489 0.101995 0.0492503
+				      specularColor	0 0 0
+				      emissiveColor	0 0 0
+				      shininess	0
+				      transparency	0.5
+				    }
+
+				    texture	NULL
+
+				    textureTransform	NULL
+
+				  }
+
+				  geometry	IndexedFaceSet {
+				    coord	Coordinate {
+				      point	[ 13.0625 1 4.25,
+					        13.0625 -1.75 4.25,
+					        13.0625 -1.75 2.75,
+					        13.0625 1 2.75 ]
+				    }
+
+				    color	NULL
+
+				    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+				    colorIndex	[  ]
+				    normal	NULL
+
+				    texCoord	NULL
+
+				    normalPerVertex	FALSE
+				    solid	FALSE
+				    creaseAngle	0.0872665
+				  }
+
+				}
+				Group {
+				  children	Shape {
+				    appearance	Appearance {
+				      material	Material {
+					ambientIntensity	0
+					diffuseColor	0.159574 0.111358 0.069227
+					specularColor	0 0 0
+					emissiveColor	0 0 0
+					shininess	0.2
+					transparency	0
+				      }
+
+				      texture	NULL
+
+				      textureTransform	NULL
+
+				    }
+
+				    geometry	IndexedFaceSet {
+				      coord	Coordinate {
+					point	[ 13.0815 1 2.625,
+						  13.0815 -1.75 2.625,
+						  13.0815 -1.75 2.75,
+						  13.0815 1 2.75,
+						  13.039 1 2.625,
+						  13.039 -1.75 2.625,
+						  13.039 -1.75 2.75,
+						  13.039 1 2.75 ]
+				      }
+
+				      color	NULL
+
+				      coordIndex	[ 4, 5, 6, -1, 4, 6, 7, -1,
+					        0, 1, 5, -1, 0, 5, 4, -1,
+					        3, 2, 1, -1, 3, 1, 0, -1,
+					        2, 3, 7, -1, 2, 7, 6, -1 ]
+				      colorIndex	[  ]
+				      normal	NULL
+
+				      texCoord	NULL
+
+				      normalPerVertex	FALSE
+				      solid	TRUE
+				      creaseAngle	0.0872665
+				    }
+
+				  }
+
+				}
+			      ]
+			    }
+
+			    translation	0 0 0
+			    center	13.0602 -0.375 3.4375
+			  }
+			]
+			center	13.0602 -0.375 2.625
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 -1.75 4.25,
+				        13 -2.5 4.25,
+				        13 -2.5 1,
+				        13 -1.75 1 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		    ]
+		  }
+		  Transform {
+		    children	[
+		    ]
+		  }
+		]
+	      }
+
+	    }
+	    DEF X_LODhissRumBV Transform {
+	      children	LOD {
+		center	12 2.5 2.5
+		range	1000
+		level	[
+		  DEF BV Transform {
+		    children	[
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 1.25 0.5,
+				        13 1.25 0.5,
+				        11 4 0.5,
+				        13 4 0.5 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 2, 1, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	USE _36
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 1.25 4.75,
+				        11 1.25 4.75,
+				        11 1.25 3.5,
+				        11 1.25 1.875,
+				        11 1.25 0.5,
+				        13 1.25 0.5,
+				        13 1.25 1,
+				        13 1.25 4.25 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 3, 4, 5, -1,
+				      3, 5, 6, -1, 3, 6, 7, -1,
+				      3, 7, 0, -1, 3, 0, 2, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    ccw	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 4 0.5,
+				        11 4 4.75,
+				        13 4 4.75,
+				        13 4 0.5,
+				        13 4.25 0.5,
+				        13 4.25 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 3, 2, 1, -1, 3, 1, 0, -1,
+				      2, 3, 4, -1, 2, 4, 5, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 4 0.5,
+				        13 1.25 0.5,
+				        13 1.25 1,
+				        13 4 1 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 4 4.25,
+				        13 1.25 4.25,
+				        13 1.25 4.75,
+				        13 4 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 4 4.75,
+				        13 1.25 4.75,
+				        11 1.25 4.75,
+				        11 4 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      DEF BVdoors Transform {
+			children	[
+			  DEF BVdoorsLeft Transform {
+			    children	Group {
+			      children	[
+				Shape {
+				  appearance	Appearance {
+				    material	Material {
+				      ambientIntensity	0
+				      diffuseColor	0.159574 0.111358 0.069227
+				      specularColor	0 0 0
+				      emissiveColor	0 0 0
+				      shininess	0.2
+				      transparency	0
+				    }
+
+				    texture	NULL
+
+				    textureTransform	NULL
+
+				  }
+
+				  geometry	IndexedFaceSet {
+				    coord	Coordinate {
+				      point	[ 13.0815 4 2.5,
+					        13.0815 1.25 2.5,
+					        13.0815 1.25 2.625,
+					        13.0815 4 2.625,
+					        13.039 4 2.5,
+					        13.039 1.25 2.5,
+					        13.039 1.25 2.625,
+					        13.039 4 2.625 ]
+				    }
+
+				    color	NULL
+
+				    coordIndex	[ 4, 5, 6, -1, 4, 6, 7, -1,
+					      0, 1, 5, -1, 0, 5, 4, -1,
+					      3, 2, 1, -1, 3, 1, 0, -1,
+					      2, 3, 7, -1, 2, 7, 6, -1 ]
+				    colorIndex	[  ]
+				    normal	NULL
+
+				    texCoord	NULL
+
+				    normalPerVertex	FALSE
+				    solid	TRUE
+				    creaseAngle	0.0872665
+				  }
+
+				}
+				Group {
+				  children	Shape {
+				    appearance	Appearance {
+				      material	Material {
+					ambientIntensity	0
+					diffuseColor	0.191489 0.101995 0.0492503
+					specularColor	0 0 0
+					emissiveColor	0 0 0
+					shininess	0
+					transparency	0.5
+				      }
+
+				      texture	NULL
+
+				      textureTransform	NULL
+
+				    }
+
+				    geometry	IndexedFaceSet {
+				      coord	Coordinate {
+					point	[ 13.0625 4 2.5,
+						  13.0625 1.25 2.5,
+						  13.0625 1.25 1,
+						  13.0625 4 1 ]
+				      }
+
+				      color	NULL
+
+				      coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+				      colorIndex	[  ]
+				      normal	NULL
+
+				      texCoord	NULL
+
+				      normalPerVertex	FALSE
+				      solid	FALSE
+				      creaseAngle	0.0872665
+				    }
+
+				  }
+
+				}
+			      ]
+			    }
+
+			    translation	0 0 0
+			    center	13.0602 2.625 1.8125
+			  }
+			  DEF BVdoorsRight Transform {
+			    children	Group {
+			      children	[
+				Shape {
+				  appearance	Appearance {
+				    material	Material {
+				      ambientIntensity	0
+				      diffuseColor	0.191489 0.101995 0.0492503
+				      specularColor	0 0 0
+				      emissiveColor	0 0 0
+				      shininess	0
+				      transparency	0.5
+				    }
+
+				    texture	NULL
+
+				    textureTransform	NULL
+
+				  }
+
+				  geometry	IndexedFaceSet {
+				    coord	Coordinate {
+				      point	[ 13.0625 4 4.25,
+					        13.0625 1.25 4.25,
+					        13.0625 1.25 2.75,
+					        13.0625 4 2.75 ]
+				    }
+
+				    color	NULL
+
+				    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+				    colorIndex	[  ]
+				    normal	NULL
+
+				    texCoord	NULL
+
+				    normalPerVertex	FALSE
+				    solid	FALSE
+				    creaseAngle	0.0872665
+				  }
+
+				}
+				Group {
+				  children	Shape {
+				    appearance	Appearance {
+				      material	Material {
+					ambientIntensity	1.04445
+					diffuseColor	0.191489 0.155692 0.113467
+					specularColor	0 0 0
+					emissiveColor	0 0 0
+					shininess	0.2
+					transparency	0
+				      }
+
+				      texture	NULL
+
+				      textureTransform	NULL
+
+				    }
+
+				    geometry	IndexedFaceSet {
+				      coord	Coordinate {
+					point	[ 13.0815 4 2.625,
+						  13.0815 1.25 2.625,
+						  13.0815 1.25 2.75,
+						  13.0815 4 2.75,
+						  13.039 4 2.625,
+						  13.039 1.25 2.625,
+						  13.039 1.25 2.75,
+						  13.039 4 2.75 ]
+				      }
+
+				      color	NULL
+
+				      coordIndex	[ 4, 5, 6, -1, 4, 6, 7, -1,
+					        0, 1, 5, -1, 0, 5, 4, -1,
+					        3, 2, 1, -1, 3, 1, 0, -1,
+					        2, 3, 7, -1, 2, 7, 6, -1 ]
+				      colorIndex	[  ]
+				      normal	NULL
+
+				      texCoord	NULL
+
+				      normalPerVertex	FALSE
+				      solid	TRUE
+				      creaseAngle	0.0872665
+				    }
+
+				  }
+
+				}
+			      ]
+			    }
+
+			    translation	0 0 0
+			    center	13.0602 2.625 3.4375
+			  }
+			]
+			center	13.0602 2.625 2.625
+		      }
+		      Group {
+			children	[
+			]
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 1.25 4.25,
+				        13 1 4.25,
+				        13 1 1,
+				        13 1.25 1 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		    ]
+		  }
+		  Transform {
+		    children	[
+		    ]
+		  }
+		]
+	      }
+
+	    }
+	    DEF noFloor Transform {
+	      children	[
+		Group {
+		  children	Shape {
+		    appearance	Appearance {
+		      material	USE _35
+
+		      texture	NULL
+
+		      textureTransform	NULL
+
+		    }
+
+		    geometry	IndexedFaceSet {
+		      coord	Coordinate {
+			point	[ 11 4.25 0.5,
+				  11 4.25 4.75,
+				  13 4.25 4.75,
+				  13 4.25 0.5 ]
+		      }
+
+		      color	NULL
+
+		      coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+		      colorIndex	[  ]
+		      normal	NULL
+
+		      texCoord	NULL
+
+		      normalPerVertex	FALSE
+		      solid	TRUE
+		      creaseAngle	0.0872665
+		    }
+
+		  }
+
+		}
+		Group {
+		  children	Shape {
+		    appearance	Appearance {
+		      material	USE _35
+
+		      texture	NULL
+
+		      textureTransform	NULL
+
+		    }
+
+		    geometry	IndexedFaceSet {
+		      coord	Coordinate {
+			point	[ 11 7 0.5,
+				  11 7 4.75,
+				  13 7 4.75,
+				  13 7 0.5,
+				  13 7.25 0.5,
+				  13 7.25 4.75 ]
+		      }
+
+		      color	NULL
+
+		      coordIndex	[ 3, 2, 1, -1, 3, 1, 0, -1,
+			        2, 3, 4, -1, 2, 4, 5, -1 ]
+		      colorIndex	[  ]
+		      normal	NULL
+
+		      texCoord	NULL
+
+		      normalPerVertex	FALSE
+		      solid	TRUE
+		      creaseAngle	0.0872665
+		    }
+
+		  }
+
+		}
+		Group {
+		  children	Shape {
+		    appearance	Appearance {
+		      material	USE _35
+
+		      texture	NULL
+
+		      textureTransform	NULL
+
+		    }
+
+		    geometry	IndexedFaceSet {
+		      coord	Coordinate {
+			point	[ 13 7 4.75,
+				  13 4.25 4.75,
+				  11 4.25 4.75,
+				  11 7 4.75,
+				  11 4.25 0.5,
+				  11 7 0.5,
+				  13 4.25 0.5,
+				  13 7 0.5 ]
+		      }
+
+		      color	NULL
+
+		      coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+			        3, 2, 4, -1, 3, 4, 5, -1,
+			        5, 4, 6, -1, 5, 6, 7, -1 ]
+		      colorIndex	[  ]
+		      normal	NULL
+
+		      texCoord	NULL
+
+		      normalPerVertex	FALSE
+		      solid	TRUE
+		      creaseAngle	0.0872665
+		    }
+
+		  }
+
+		}
+		Group {
+		  children	Shape {
+		    appearance	Appearance {
+		      material	USE _35
+
+		      texture	NULL
+
+		      textureTransform	NULL
+
+		    }
+
+		    geometry	IndexedFaceSet {
+		      coord	Coordinate {
+			point	[ 11 10 0.5,
+				  11 10 4.75,
+				  13 10 4.75,
+				  13 10 0.5 ]
+		      }
+
+		      color	NULL
+
+		      coordIndex	[ 3, 2, 1, -1, 3, 1, 0, -1 ]
+		      colorIndex	[  ]
+		      normal	NULL
+
+		      texCoord	NULL
+
+		      normalPerVertex	FALSE
+		      solid	TRUE
+		      creaseAngle	0.0872665
+		    }
+
+		  }
+
+		}
+		Group {
+		  children	Shape {
+		    appearance	Appearance {
+		      material	USE _35
+
+		      texture	NULL
+
+		      textureTransform	NULL
+
+		    }
+
+		    geometry	IndexedFaceSet {
+		      coord	Coordinate {
+			point	[ 13 10 4.75,
+				  13 7.25 4.75,
+				  11 7.25 4.75,
+				  11 10 4.75,
+				  11 7.25 0.5,
+				  11 10 0.5,
+				  13 7.25 0.5,
+				  13 10 0.5 ]
+		      }
+
+		      color	NULL
+
+		      coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+			        3, 2, 4, -1, 3, 4, 5, -1,
+			        5, 4, 6, -1, 5, 6, 7, -1 ]
+		      colorIndex	[  ]
+		      normal	NULL
+
+		      texCoord	NULL
+
+		      normalPerVertex	FALSE
+		      solid	TRUE
+		      creaseAngle	0.0872665
+		    }
+
+		  }
+
+		}
+		Group {
+		  children	Shape {
+		    appearance	Appearance {
+		      material	USE _35
+
+		      texture	NULL
+
+		      textureTransform	NULL
+
+		    }
+
+		    geometry	IndexedFaceSet {
+		      coord	Coordinate {
+			point	[ 11 7.25 0.5,
+				  11 7.25 4.75,
+				  13 7.25 4.75,
+				  13 7.25 0.5 ]
+		      }
+
+		      color	NULL
+
+		      coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+		      colorIndex	[  ]
+		      normal	NULL
+
+		      texCoord	NULL
+
+		      normalPerVertex	FALSE
+		      solid	TRUE
+		      creaseAngle	0.0872665
+		    }
+
+		  }
+
+		}
+	      ]
+	    }
+	    DEF X_LODhissThirdFloor Transform {
+	      children	LOD {
+		center	12 13 2
+		range	1000
+		level	[
+		  DEF third Transform {
+		    children	[
+		      Transform {
+			children	DEF CRAP Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	Box {
+			    size	0.01 5.8 4.2
+			  }
+
+			}
+
+			translation	13 7.15 2.7
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	USE _36
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 10.25 0.5,
+				        11 10.25 4.75,
+				        11.5 10.25 4.75,
+				        11.5 10.25 5.3761,
+				        12.5 10.25 5.3761,
+				        12.5 10.25 4.75,
+				        13 10.25 4.75,
+				        13 10.25 4.25,
+				        13 10.25 1,
+				        13 10.25 0.5 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 2, 3, 4, -1,
+				      2, 4, 5, -1, 5, 6, 7, -1,
+				      5, 7, 8, -1, 5, 8, 9, -1,
+				      5, 9, 0, -1, 5, 0, 2, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 13 0.5,
+				        11 13 0.5,
+				        11 13 4.25,
+				        13 13 4.25,
+				        13 13 1 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 2, 3, 4, -1,
+				      2, 4, 0, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    ccw	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 13 4.25,
+				        11 11.2779 4.25,
+				        11.5 11.2779 4.25,
+				        11.5 11.75 4.25,
+				        11.75 12 4.25,
+				        12.25 12 4.25,
+				        12.5 11.75 4.25,
+				        12.5 11.2779 4.25,
+				        13 11.2779 4.25,
+				        13 13 4.25 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+				      0, 3, 4, -1, 0, 4, 5, -1,
+				      6, 7, 8, -1, 6, 8, 9, -1,
+				      9, 0, 5, -1, 9, 5, 6, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    ccw	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11.5 10.25 5.3761,
+				        11.5 10.25 4.75,
+				        11.5 10.8215 4.75,
+				        11.5 11.75 5.3761,
+				        11.5 11.75 4.25,
+				        11.75 12 5.3761,
+				        11.75 12 4.25,
+				        12.25 12 5.3761,
+				        12.25 12 4.25,
+				        12.5 11.75 5.3761,
+				        12.5 11.75 4.25,
+				        12.5 10.8215 4.75,
+				        12.5 10.25 5.3761,
+				        12.5 10.25 4.75,
+				        12.5 11.2779 4.25,
+				        11.5 11.2779 4.25 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+				      3, 2, 15, -1, 3, 15, 4, -1,
+				      3, 4, 5, -1, 5, 4, 6, -1,
+				      5, 6, 7, -1, 7, 6, 8, -1,
+				      7, 8, 9, -1, 9, 8, 10, -1,
+				      9, 10, 14, -1, 9, 14, 11, -1,
+				      9, 11, 12, -1, 12, 11, 13, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 11.2779 4.25,
+				        11.5 11.2779 4.25,
+				        11 10.8215 4.75,
+				        11.5 11.2779 4.25,
+				        11.5 10.8215 4.74999 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 3, 4, 2, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11.5 10.8215 4.75,
+				        11.5 10.25 4.75,
+				        11 10.25 4.75,
+				        11 10.8215 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 11.2779 4.25,
+				        13 10.8215 4.74999,
+				        12.5 10.8215 4.74999,
+				        12.5 11.2779 4.25 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 10.8215 4.74999,
+				        13 10.25 4.75,
+				        12.5 10.25 4.75,
+				        12.5 10.8215 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 11.2779 4.25,
+				        13 10.25 4.25,
+				        13 10.8215 4.74999,
+				        13 10.25 4.75 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 2, 1, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 13 0.5,
+				        13 10.25 0.5,
+				        13 10.25 1,
+				        13 13 1 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11.25 10.2459 0.4998,
+				        11.25 10.25 0.1666,
+				        11.25 12.625 0.500001,
+				        11.25 12.75 0.166601,
+				        11.5 12.875 0.5,
+				        11.5 13 0.1666,
+				        12.5 12.875 0.500001,
+				        12.5 13 0.166601,
+				        12.75 12.625 0.500001,
+				        12.75 12.75 0.166601,
+				        12.75 10.2459 0.4998,
+				        12.75 10.25 0.1666 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 2, 1, 3, -1,
+				      2, 3, 4, -1, 4, 3, 5, -1,
+				      4, 5, 6, -1, 6, 5, 7, -1,
+				      6, 7, 8, -1, 8, 7, 9, -1,
+				      8, 9, 10, -1, 10, 9, 11, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11.5 10.5834 0.1668,
+				        11.5 12.75 0.166801,
+				        12.5 12.75 0.166801,
+				        12.5 10.5834 0.1668,
+				        11.5 10.5834 0,
+				        11.5 12.75 1e-06,
+				        12.5 12.75 1e-06,
+				        12.5 10.5834 0,
+				        12.75 10.5832 0.1666,
+				        12.75 12.75 0.166601,
+				        12.5 13 0.166601,
+				        11.5 13 0.1666,
+				        11.25 12.75 0.166601,
+				        11.25 10.5832 0.1666 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 6, 7, 3, -1, 6, 3, 2, -1,
+				      5, 6, 2, -1, 5, 2, 1, -1,
+				      4, 5, 1, -1, 4, 1, 0, -1,
+				      2, 3, 8, -1, 2, 8, 9, -1,
+				      2, 9, 10, -1, 2, 10, 11, -1,
+				      1, 2, 11, -1, 1, 11, 12, -1,
+				      1, 12, 0, -1, 0, 12, 13, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11 13 0.5,
+				        11 10.25 0.5,
+				        11 10.25 4.75,
+				        11 10.8215 4.75,
+				        11 11.2779 4.25,
+				        11 13 4.25 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+				      0, 3, 4, -1, 0, 4, 5, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    ccw	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 13.25 4.25,
+				        13 13 4.25,
+				        13 13 1,
+				        13 13.25 1 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Shape {
+			appearance	Appearance {
+			  material	USE _35
+
+			  texture	NULL
+
+			  textureTransform	NULL
+
+			}
+
+			geometry	IndexedFaceSet {
+			  coord	Coordinate {
+			    point	[ 13 10 4.75,
+				      13 10.25 0.5,
+				      13 10.25 4.75,
+				      13 10 0.5 ]
+			  }
+
+			  color	NULL
+
+			  coordIndex	[ 0, 1, 2, -1, 0, 3, 1, -1 ]
+			  normal	NULL
+
+			  texCoord	NULL
+
+			  normalPerVertex	FALSE
+			  ccw	TRUE
+			  solid	TRUE
+			  convex	TRUE
+			  creaseAngle	0.0872665
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	Material {
+			      ambientIntensity	0.25
+			      diffuseColor	0 0.136485 0.8
+			      specularColor	0 0 0
+			      emissiveColor	0.416894 0.421713 0.43617
+			      shininess	0
+			      transparency	0
+			    }
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 11.5 10.25 5.3761,
+				        11.5 11.75 5.3761,
+				        11.75 12 5.3761,
+				        12.25 12 5.3761,
+				        12.5 11.75 5.3761,
+				        12.5 10.25 5.3761 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1,
+				      0, 3, 4, -1, 0, 4, 5, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 12.75 10.75 0,
+				        12.75 10.5791 0,
+				        12.75 10.5791 0.2499,
+				        12.75 10.4125 0.2499,
+				        12.75 10.4125 0.4998,
+				        12.75 10.2459 0.4998,
+				        11.25 10.75 0,
+				        11.25 10.5791 0,
+				        11.25 10.5791 0.2499,
+				        11.25 10.4125 0.2499,
+				        11.25 10.4125 0.4998,
+				        11.25 10.2459 0.4998 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 1, 7, -1, 0, 7, 6, -1,
+				      1, 2, 8, -1, 1, 8, 7, -1,
+				      2, 3, 9, -1, 2, 9, 8, -1,
+				      3, 4, 10, -1, 3, 10, 9, -1,
+				      4, 5, 11, -1, 4, 11, 10, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    ccw	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      Group {
+			children	Shape {
+			  appearance	Appearance {
+			    material	USE _35
+
+			    texture	NULL
+
+			    textureTransform	NULL
+
+			  }
+
+			  geometry	IndexedFaceSet {
+			    coord	Coordinate {
+			      point	[ 13 10.25 0.5,
+				        11 10.25 0.5,
+				        13 13 0.5,
+				        11 13 0.5,
+				        11.25 10.25 0.5,
+				        11.25 12.625 0.5,
+				        11.5 12.875 0.5,
+				        12.5 12.875 0.5,
+				        12.75 12.625 0.5,
+				        12.75 10.25 0.5 ]
+			    }
+
+			    color	NULL
+
+			    coordIndex	[ 0, 9, 8, -1, 5, 4, 1, -1,
+				      5, 1, 3, -1, 2, 0, 8, -1,
+				      2, 8, 7, -1, 2, 7, 6, -1,
+				      6, 5, 3, -1, 6, 3, 2, -1 ]
+			    colorIndex	[  ]
+			    normal	NULL
+
+			    texCoord	NULL
+
+			    normalPerVertex	FALSE
+			    ccw	FALSE
+			    solid	TRUE
+			    creaseAngle	0.0872665
+			  }
+
+			}
+
+		      }
+		      DEF thirdDoors Transform {
+			children	[
+			  DEF thirdDoorsRight Transform {
+			    children	Group {
+			      children	[
+				Shape {
+				  appearance	Appearance {
+				    material	Material {
+				      ambientIntensity	1.04445
+				      diffuseColor	0.191489 0.155692 0.113467
+				      specularColor	0 0 0
+				      emissiveColor	0 0 0
+				      shininess	0.2
+				      transparency	0
+				    }
+
+				    texture	NULL
+
+				    textureTransform	NULL
+
+				  }
+
+				  geometry	IndexedFaceSet {
+				    coord	Coordinate {
+				      point	[ 13.0815 13 2.625,
+					        13.0815 10.25 2.625,
+					        13.0815 10.25 2.75,
+					        13.0815 13 2.75,
+					        13.039 13 2.625,
+					        13.039 10.25 2.625,
+					        13.039 10.25 2.75,
+					        13.039 13 2.75 ]
+				    }
+
+				    color	NULL
+
+				    coordIndex	[ 4, 5, 6, -1, 4, 6, 7, -1,
+					      0, 1, 5, -1, 0, 5, 4, -1,
+					      3, 2, 1, -1, 3, 1, 0, -1,
+					      2, 3, 7, -1, 2, 7, 6, -1 ]
+				    colorIndex	[  ]
+				    normal	NULL
+
+				    texCoord	NULL
+
+				    normalPerVertex	FALSE
+				    solid	TRUE
+				    creaseAngle	0.0872665
+				  }
+
+				}
+				Group {
+				  children	Shape {
+				    appearance	Appearance {
+				      material	Material {
+					ambientIntensity	0
+					diffuseColor	0.191489 0.101995 0.0492503
+					specularColor	0 0 0
+					emissiveColor	0 0 0
+					shininess	0
+					transparency	0.5
+				      }
+
+				      texture	NULL
+
+				      textureTransform	NULL
+
+				    }
+
+				    geometry	IndexedFaceSet {
+				      coord	Coordinate {
+					point	[ 13.0625 13 4.25,
+						  13.0625 10.25 4.25,
+						  13.0625 10.25 2.75,
+						  13.0625 13 2.75 ]
+				      }
+
+				      color	NULL
+
+				      coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+				      colorIndex	[  ]
+				      normal	NULL
+
+				      texCoord	NULL
+
+				      normalPerVertex	FALSE
+				      solid	FALSE
+				      creaseAngle	0.0872665
+				    }
+
+				  }
+
+				}
+			      ]
+			    }
+
+			    translation	0 0 0
+			    center	13.0602 11.625 3.4375
+			  }
+			  DEF thirdDoorsLeft Transform {
+			    children	Group {
+			      children	[
+				Shape {
+				  appearance	Appearance {
+				    material	Material {
+				      ambientIntensity	0
+				      diffuseColor	0.148936 0.133423 0.0994609
+				      specularColor	0 0 0
+				      emissiveColor	0 0 0
+				      shininess	0
+				      transparency	0
+				    }
+
+				    texture	NULL
+
+				    textureTransform	NULL
+
+				  }
+
+				  geometry	IndexedFaceSet {
+				    coord	Coordinate {
+				      point	[ 13.0815 13 2.5,
+					        13.0815 10.25 2.5,
+					        13.0815 10.25 2.625,
+					        13.0815 13 2.625,
+					        13.039 13 2.5,
+					        13.039 10.25 2.5,
+					        13.039 10.25 2.625,
+					        13.039 13 2.625 ]
+				    }
+
+				    color	NULL
+
+				    coordIndex	[ 4, 5, 6, -1, 4, 6, 7, -1,
+					      0, 1, 5, -1, 0, 5, 4, -1,
+					      3, 2, 1, -1, 3, 1, 0, -1,
+					      2, 3, 7, -1, 2, 7, 6, -1 ]
+				    colorIndex	[  ]
+				    normal	NULL
+
+				    texCoord	NULL
+
+				    normalPerVertex	FALSE
+				    solid	TRUE
+				    creaseAngle	0.0872665
+				  }
+
+				}
+				Group {
+				  children	Shape {
+				    appearance	Appearance {
+				      material	Material {
+					ambientIntensity	0
+					diffuseColor	0.191489 0.101995 0.0492503
+					specularColor	0 0 0
+					emissiveColor	0 0 0
+					shininess	0
+					transparency	0.5
+				      }
+
+				      texture	NULL
+
+				      textureTransform	NULL
+
+				    }
+
+				    geometry	IndexedFaceSet {
+				      coord	Coordinate {
+					point	[ 13.0625 13 2.5,
+						  13.0625 10.25 2.5,
+						  13.0625 10.25 1,
+						  13.0625 13 1 ]
+				      }
+
+				      color	NULL
+
+				      coordIndex	[ 0, 1, 2, -1, 0, 2, 3, -1 ]
+				      colorIndex	[  ]
+				      normal	NULL
+
+				      texCoord	NULL
+
+				      normalPerVertex	FALSE
+				      solid	FALSE
+				      creaseAngle	0.0872665
+				    }
+
+				  }
+
+				}
+			      ]
+			    }
+
+			    translation	0 0 0
+			    center	13.0602 11.625 1.8125
+			  }
+			]
+			center	13.0602 11.625 2.625
+		      }
+		    ]
+		  }
+		  Transform {
+		    children	[
+		    ]
+		  }
+		]
+	      }
+
+	    }
+	  ]
+	}
+      ]
+    }
+    DEF elevatorCallButtonSecondFloor Transform {
+      children	[
+	DEF secondFloorOutsideCallButton TouchSensor {
+	}
+	USE BUTTONSHAPE_25
+      ]
+      translation	13 2.525 0.85
+      rotation	0 0 1  1.5708
+      scale	1 1 1
+    }
+    DEF elevatorCallButtonFirstFloor Transform {
+      children	[
+	DEF OPEN_45 TouchSensor {
+	}
+	DEF BUTTONSHAPE Shape {
+	  appearance	Appearance {
+	    material	Material {
+	      diffuseColor	1 0 0
+	      emissiveColor	0.3 0 0
+	    }
+
+	    texture	NULL
+
+	    textureTransform	NULL
+
+	  }
+
+	  geometry	Cylinder {
+	    radius	0.03
+	    height	0.04
+	  }
+
+	}
+      ]
+      translation	13 -0.5 0.85
+      rotation	0 0 1  1.5708
+      scale	1 1 1
+    }
+    DEF elevatorCallButtonThirdFloor Transform {
+      children	[
+	DEF OPEN_46 TouchSensor {
+	}
+	DEF BUTTONSHAPE Shape {
+	  appearance	Appearance {
+	    material	Material {
+	      diffuseColor	1 0 0
+	      emissiveColor	0.3 0 0
+	    }
+
+	    texture	NULL
+
+	    textureTransform	NULL
+
+	  }
+
+	  geometry	Cylinder {
+	    radius	0.03
+	    height	0.04
+	  }
+
+	}
+      ]
+      translation	13 11.525 0.85
+      rotation	0 0 1  1.5708
+      scale	0.999999 0.999999 1
+    }
+    DEF VP1 Viewpoint {
+      position	10.6156 2.68232 2.84889
+      orientation	-0.105476 -0.991353 -0.0780658  1.28264
+      fieldOfView	0.785398
+      description	"viewpoint2"
+    }
+  ]
+}
+ROUTE CONTROL.start1to2 TO from1to2time.set_startTime
+ROUTE CONTROL.start2to3 TO from2to3time.set_startTime
+ROUTE CONTROL.start1to3 TO from1to3time.set_startTime
+ROUTE CONTROL.startElevOutsideDoorOpener TO OPENER.set_startTime
+ROUTE CONTROL.door1 TO FirstFloorLeftTranslationInterp.set_fraction
+ROUTE CONTROL.door1 TO FirstFloorRightTranslationInterp.set_fraction
+ROUTE CONTROL.door2 TO BVdoorsLeftTranslationInterp.set_fraction
+ROUTE CONTROL.door2 TO BVdoorsRightTranslationInterp.set_fraction
+ROUTE CONTROL.door3 TO thirdDoorsLeftTranslationInterp.set_fraction
+ROUTE CONTROL.door3 TO thirdDoorsRightTranslationInterp.set_fraction
+ROUTE CONTROL.door1 TO hissDoorsUpperTranslationInterp.set_fraction
+ROUTE CONTROL.door2 TO hissDoorsUpperTranslationInterp.set_fraction
+ROUTE CONTROL.door3 TO hissDoorsUpperTranslationInterp.set_fraction
+ROUTE CONTROL.door1 TO hissDoorsLowerTranslationInterp.set_fraction
+ROUTE CONTROL.door2 TO hissDoorsLowerTranslationInterp.set_fraction
+ROUTE CONTROL.door3 TO hissDoorsLowerTranslationInterp.set_fraction
+ROUTE from1to2time.fraction_changed TO from1to2invert.set_fraction
+ROUTE CONTROL.invert1to2 TO from1to2invert.set_keyValue
+ROUTE from1to2invert.value_changed TO from1to2interp.set_fraction
+ROUTE from2to3time.fraction_changed TO from2to3invert.set_fraction
+ROUTE CONTROL.invert2to3 TO from2to3invert.set_keyValue
+ROUTE from2to3invert.value_changed TO from2to3interp.set_fraction
+ROUTE from1to3time.fraction_changed TO from1to3invert.set_fraction
+ROUTE CONTROL.invert1to3 TO from1to3invert.set_keyValue
+ROUTE from1to3invert.value_changed TO from1to3interp.set_fraction
+ROUTE OPENER.fraction_changed TO CONTROL.set_fraction
+ROUTE BUT1.touchTime TO CONTROL.floor1
+ROUTE BUT3.touchTime TO CONTROL.floor3
+ROUTE OPENER.isActive TO CONTROL.doorsClosing
+ROUTE from1to2time.isActive TO CONTROL.elevMoving
+ROUTE from2to3time.isActive TO CONTROL.elevMoving
+ROUTE from1to3time.isActive TO CONTROL.elevMoving
+ROUTE secondFloorOutsideCallButton.touchTime TO CONTROL.secondFloorRequest
+ROUTE BUT2.touchTime TO CONTROL.secondFloorRequest
+ROUTE OPEN_46.touchTime TO CONTROL.thirdFloorRequest
+ROUTE OPEN_45.touchTime TO CONTROL.firstFloorRequest
+ROUTE secondFloorOutsideCallButton.touchTime TO dooropen_19.set_startTime
+ROUTE OPEN_45.touchTime TO dooropen_19.set_startTime
+ROUTE OPEN_46.touchTime TO dooropen_19.set_startTime
+ROUTE BUT2.touchTime TO X_Sound_1clip_20.set_startTime
+ROUTE BUT1.touchTime TO webmetrics_21.set_startTime
+ROUTE BUT3.touchTime TO group_demos.set_startTime
+ROUTE hissDoorsLowerTranslationInterp.value_changed TO elevatorDoorsLower.set_translation
+ROUTE hissDoorsUpperTranslationInterp.value_changed TO elevatorDoorsUpper.set_translation
+ROUTE _31.isActive TO VP_Elevator.set_bind
+ROUTE _31.enterTime TO X_Sound_1clip_32.set_startTime
+ROUTE _31.exitTime TO X_Sound_1clip_32.set_stopTime
+ROUTE from1to2interp.value_changed TO theElevator.set_translation
+ROUTE from2to3interp.value_changed TO theElevator.set_translation
+ROUTE CONTROL.elevDestFloorHeight TO theElevator.set_translation
+ROUTE from1to3interp.value_changed TO theElevator.set_translation
+ROUTE enterWorldScript.firstTime TO enterWorldTimeSensor.set_enabled
+ROUTE enterWorldTimeSensor.time TO enterWorldScript.triggerIn
+ROUTE enterWorldScript.startTime TO Time.set_startTime
+ROUTE FirstFloorLeftTranslationInterp.value_changed TO firstFloorLeft.set_translation
+ROUTE FirstFloorRightTranslationInterp.value_changed TO firstFloorRight.set_translation
+ROUTE BVdoorsLeftTranslationInterp.value_changed TO BVdoorsLeft.set_translation
+ROUTE BVdoorsRightTranslationInterp.value_changed TO BVdoorsRight.set_translation
+ROUTE thirdDoorsRightTranslationInterp.value_changed TO thirdDoorsRight.set_translation
+ROUTE thirdDoorsLeftTranslationInterp.value_changed TO thirdDoorsLeft.set_translation
