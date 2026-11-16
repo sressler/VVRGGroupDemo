@@ -16,13 +16,7 @@ Click **Click to enter** when the page loads (this also turns on sound), then wa
 
 The building was adapted from the *Virtual Music Museum* and redecorated with the group's work. Its rooms are spread over three floors joined by a working elevator and stairs.
 
-<table>
-  <tr>
-    <td align="center" width="33%"><img src="world/sg_ant1.jpg" alt="Anthropometric measurement diagram of a child" height="180"><br><b>AnthroKids</b></td>
-    <td align="center" width="33%"><img src="world/sgn_nirvegolf.jpg" alt="NIRVE search-result visualization" height="180"><br><b>NIRVE</b></td>
-    <td align="center" width="33%"><img src="world/sg_websat1.jpg" alt="WebSAT web usability tool" height="180"><br><b>WebMetrics</b></td>
-  </tr>
-</table>
+
 
 | Room | What to do there |
 | --- | --- |
