@@ -1,3 +1,5 @@
+<img src="screenshot_755.png" alt="Anthropometric Landmarks head exhibit" width="49%"> <img src="screenshot_754.png" alt="NIRVE concept-cluster sphere" width="49%"> <img src="screenshot_753.png" alt="Falling man at the top of the stairs" width="49%"> <img src="screenshot_752.png" alt="AnthroKids room" width="49%">
+
 <p align="center">
   <img src="logo4-72.gif" alt="The Visualization and Virtual Reality Group">
 </p>
