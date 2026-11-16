@@ -1,14 +1,14 @@
-<img src="screenshot_755.png" alt="Anthropometric Landmarks head exhibit" width="49%"> <img src="screenshot_754.png" alt="NIRVE concept-cluster sphere" width="49%"> <img src="screenshot_753.png" alt="Falling man at the top of the stairs" width="49%"> <img src="screenshot_752.png" alt="AnthroKids room" width="49%">
+<img src="world/screenshot_755.png" alt="Anthropometric Landmarks head exhibit" width="49%"> <img src="world/screenshot_754.png" alt="NIRVE concept-cluster sphere" width="49%"> <img src="world/screenshot_753.png" alt="Falling man at the top of the stairs" width="49%"> <img src="world/screenshot_752.png" alt="AnthroKids room" width="49%">
 
 <p align="center">
-  <img src="logo4-72.gif" alt="The Visualization and Virtual Reality Group">
+  <img src="world/logo4-72.gif" alt="The Visualization and Virtual Reality Group">
 </p>
 
 # NIST VVRG Group Demo
 
 A walk-through VRML 2.0 world built around 1998 by the Visualization and Virtual Reality Group (VVRG) at NIST to show off the group's projects. It was never shown outside NIST. This repository is a resurrection of that demo, running in a modern web browser with the [X_ITE](https://create3000.github.io/x_ite/) X3D/VRML player.
 
-## ▶ [RUN ME: launch the live demo](https://sressler.github.io/VVRGGroupDemo/xite.html)
+## ▶ [RUN ME: launch the live demo](https://sressler.github.io/VVRGGroupDemo/world/xite.html)
 
 Click **Click to enter** when the page loads (this also turns on sound), then walk around.
 
@@ -18,9 +18,9 @@ The building was adapted from the *Virtual Music Museum* and redecorated with th
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="sg_ant1.jpg" alt="Anthropometric measurement diagram of a child" height="180"><br><b>AnthroKids</b></td>
-    <td align="center" width="33%"><img src="sgn_nirvegolf.jpg" alt="NIRVE search-result visualization" height="180"><br><b>NIRVE</b></td>
-    <td align="center" width="33%"><img src="sg_websat1.jpg" alt="WebSAT web usability tool" height="180"><br><b>WebMetrics</b></td>
+    <td align="center" width="33%"><img src="world/sg_ant1.jpg" alt="Anthropometric measurement diagram of a child" height="180"><br><b>AnthroKids</b></td>
+    <td align="center" width="33%"><img src="world/sgn_nirvegolf.jpg" alt="NIRVE search-result visualization" height="180"><br><b>NIRVE</b></td>
+    <td align="center" width="33%"><img src="world/sg_websat1.jpg" alt="WebSAT web usability tool" height="180"><br><b>WebMetrics</b></td>
   </tr>
 </table>
 
@@ -59,14 +59,14 @@ The world has to be served over HTTP; opening `xite.html` straight from disk wil
 ```
 git clone https://github.com/sressler/VVRGGroupDemo.git
 cd VVRGGroupDemo
-python3 serve.py
+python3 world/serve.py
 ```
 
-This serves the folder on port 8086 and opens `http://localhost:8086/xite.html`. Pass a different port as an argument, for example `python3 serve.py 8080`.
+This serves the `world` folder on port 8086 and opens `http://localhost:8086/xite.html`. Pass a different port as an argument, for example `python3 world/serve.py 8080`.
 
 ## Files
 
-| File | Purpose |
+| File (in `world/`) | Purpose |
 | --- | --- |
 | `xite.html` | The X_ITE player page, with keyboard navigation, info panel and drag-and-drop loading |
 | `index.wrl` | The main hall, entry point of the world |
